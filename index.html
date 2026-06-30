@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Quest — il tuo lavoro è un'avventura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pixel:'Silkscreen', ui-monospace, monospace;
+    --num:'Silkscreen', ui-monospace, monospace;
+    --body:'Pixelify Sans', ui-monospace, monospace;
+    --radius:0px;
+    /* rarities (fixed across themes) */
+    --r-common:#9AA0B4; --r-uncommon:#4ADE80; --r-rare:#3FA9FF; --r-epic:#C084FC; --r-legendary:#FFB020;
+  }
+  /* ---------- DARK (default) ---------- */
+  html[data-theme="dark"]{
+    --bg:#14121F; --bg2:#0D0B16; --panel:#211D33; --panel2:#2A2540;
+    --slot:#16131F; --edge:#48406F; --edge2:#6A5DA8;
+    --ink:#ECE8FA; --muted:#A096C8; --faint:#6E6695;
+    --gold:#FFC53D; --mana:#9C7BF0; --hp:#FF5470; --green:#4ADE80;
+    --shadowc:#070611; --bevel-lt:rgba(255,255,255,.10); --bevel-dk:rgba(0,0,0,.40);
+    --grid:rgba(120,100,200,.06);
+  }
+  /* ---------- LIGHT ---------- */
+  html[data-theme="light"]{
+    --bg:#D8DDEE; --bg2:#C6CCE2; --panel:#F3F1FB; --panel2:#FFFFFF;
+    --slot:#E7E4F4; --edge:#9D96C6; --edge2:#7A6FBA;
+    --ink:#1E1A30; --muted:#5A5480; --faint:#8A84AC;
+    --gold:#B97E0C; --mana:#7C3AED; --hp:#D63A56; --green:#179257;
+    --shadowc:#9C97BE; --bevel-lt:rgba(255,255,255,.65); --bevel-dk:rgba(0,0,0,.12);
+    --grid:rgba(90,70,170,.05);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--body); font-size:17px; line-height:1.45;
+    background:
+      linear-gradient(0deg, var(--grid) 1px, transparent 1px) 0 0 / 100% 18px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 18px 100%,
+      var(--bg);
+    color:var(--ink);
+    transition:background-color .35s ease, color .35s ease;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,textarea{font-family:var(--body);font-size:16px;color:inherit}
+  svg{image-rendering:pixelated}
+  ::selection{background:var(--mana);color:#fff}
+
+  .px{font-family:var(--pixel)}
+  .wrap{max-width:1140px;margin:0 auto;padding:18px 16px 90px}
+
+  /* ---- chunky pixel panel ---- */
+  .panel{
+    background:var(--panel); border:3px solid var(--edge);
+    box-shadow: inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 5px 5px 0 var(--shadowc);
+  }
+  .pad{padding:18px}
+
+  /* ---- top utility bar ---- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo .glyph{
+    width:42px;height:42px;background:linear-gradient(150deg,var(--mana),#5b3fb0);
+    border:3px solid var(--edge2);display:grid;place-items:center;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,.2), inset -2px -2px 0 rgba(0,0,0,.35), 4px 4px 0 var(--shadowc);
+  }
+  .logo .glyph span{font-family:var(--pixel);font-size:16px;color:#fff;text-shadow:2px 2px 0 #3a2a78}
+  .logo h1{font-family:var(--pixel);font-size:15px;letter-spacing:.5px;color:var(--ink);text-shadow:2px 2px 0 var(--shadowc)}
+  .logo p{font-size:14px;color:var(--muted);margin-top:3px}
+
+  .util{display:flex;gap:8px;flex-wrap:wrap}
+  .ubtn{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--body);font-weight:600;font-size:14px;
+    color:var(--muted);background:var(--panel);border:3px solid var(--edge);padding:8px 12px;
+    box-shadow: inset 1px 1px 0 var(--bevel-lt), inset -1px -1px 0 var(--bevel-dk), 3px 3px 0 var(--shadowc);
+    transition:transform .05s;
+  }
+  .ubtn:hover{color:var(--ink)}
+  .ubtn:active{transform:translate(3px,3px);box-shadow:inset 1px 1px 0 var(--bevel-lt), inset -1px -1px 0 var(--bevel-dk), 0 0 0 var(--shadowc)}
+  .ubtn .dot{width:9px;height:9px;background:var(--faint);border:2px solid var(--shadowc)}
+  .ubtn.on .dot{background:var(--green)} .ubtn.off .dot{background:var(--hp)}
+
+  /* ---- character HUD ---- */
+  .hud{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;margin-bottom:18px}
+  @media(max-width:680px){.hud{grid-template-columns:auto 1fr;}.hud .hud-side{grid-column:1/-1}}
+  .avatar{
+    width:92px;height:92px;background:var(--slot);border:3px solid var(--edge2);padding:6px;
+    box-shadow: inset 2px 2px 0 var(--bevel-dk), 4px 4px 0 var(--shadowc); position:relative;
+  }
+  .avatar svg{display:block;width:100%;height:100%}
+  .avatar .lvlbadge{
+    position:absolute;right:-10px;bottom:-10px;background:var(--gold);color:#2a1d00;
+    font-family:var(--num);font-size:12px;border:3px solid var(--shadowc);
+    padding:2px 7px;line-height:1;box-shadow:2px 2px 0 var(--shadowc);
+  }
+  .hud-mid .cname{font-family:var(--pixel);font-size:14px;color:var(--ink);text-shadow:1px 1px 0 var(--shadowc)}
+  .hud-mid .ctitle{font-size:14px;color:var(--muted);margin:4px 0 10px}
+  .hud-mid .ctitle b{color:var(--mana)}
+
+  .xpbar{position:relative;height:20px;background:var(--slot);border:3px solid var(--edge);overflow:hidden;
+    box-shadow:inset 2px 2px 0 var(--bevel-dk)}
+  .xpbar > i{display:block;height:100%;width:0;background:linear-gradient(180deg,#ffe07a,var(--gold));transition:width .5s steps(20)}
+  .xpbar::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background-image:repeating-linear-gradient(90deg, transparent 0 8px, rgba(0,0,0,.22) 8px 9px)}
+  .xptext{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-top:5px}
+  .xptext b{color:var(--gold)}
+  #hudXpText{font-family:var(--num);font-size:12px;letter-spacing:.5px;color:var(--gold)}
+  #hudPassive{font-family:var(--num);font-size:10px;letter-spacing:.5px;color:var(--gold)}
+
+  .hud-side{display:flex;flex-direction:column;gap:8px}
+  .hud-side .ubtn{justify-content:center}
+  .swapbtn{background:var(--mana);color:#fff;border-color:var(--edge2)}
+  .swapbtn:hover{filter:brightness(1.08)}
+
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:1fr 1.04fr;gap:18px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .panel + .panel{margin-top:18px}
+
+  .head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .head h2{font-family:var(--pixel);font-size:13px;color:var(--ink);text-shadow:1px 1px 0 var(--shadowc)}
+  .eyebrow{font-family:var(--pixel);font-size:9px;letter-spacing:1px;color:var(--faint);margin-bottom:6px}
+
+  /* day nav */
+  .daynav{display:flex;align-items:center;gap:6px}
+  .navb{width:30px;height:30px;display:grid;place-items:center;background:var(--panel2);border:3px solid var(--edge);
+    color:var(--muted);box-shadow:2px 2px 0 var(--shadowc);font-size:16px;line-height:1}
+  .navb:hover{color:var(--ink)} .navb:active{transform:translate(2px,2px);box-shadow:none}
+  .navb[disabled]{opacity:.35;cursor:default}
+  .daylabel{min-width:120px;text-align:center;font-size:14px;font-weight:600;text-transform:capitalize}
+  .daylabel small{display:block;font-family:var(--num);color:var(--faint);font-size:11px;text-transform:none}
+  .todaybtn{font-size:13px;font-weight:700;color:var(--gold);background:var(--slot);border:3px solid var(--edge);
+    padding:6px 10px;box-shadow:2px 2px 0 var(--shadowc);margin-bottom:12px}
+  .todaybtn[hidden]{display:none}
+
+  /* add quest */
+  .addrow{display:flex;gap:8px;margin-bottom:12px}
+  .addrow input{flex:1;background:var(--slot);border:3px solid var(--edge);padding:11px 12px;color:var(--ink);
+    box-shadow:inset 2px 2px 0 var(--bevel-dk)}
+  .addrow input:focus{outline:none;border-color:var(--mana)}
+  .addrow input::placeholder{color:var(--faint)}
+  .addbtn{background:var(--green);color:#0a2316;border:3px solid var(--shadowc);padding:0 16px;font-weight:700;
+    box-shadow:3px 3px 0 var(--shadowc)}
+  html[data-theme="dark"] .addbtn{color:#062012}
+  .addbtn:active{transform:translate(3px,3px);box-shadow:none}
+
+  ul.quests{list-style:none;display:flex;flex-direction:column;gap:6px}
+  li.quest{display:flex;align-items:center;gap:11px;padding:9px;background:var(--slot);border:3px solid transparent}
+  li.quest:hover{border-color:var(--edge)}
+  .check{width:24px;height:24px;flex:none;background:var(--panel2);border:3px solid var(--edge);display:grid;place-items:center;
+    box-shadow:inset 1px 1px 0 var(--bevel-dk)}
+  .check:hover{border-color:var(--green)}
+  li.done .check{background:var(--green);border-color:var(--green)}
+  .check b{font-family:var(--pixel);font-size:11px;color:#0a2316;opacity:0}
+  li.done .check b{opacity:1}
+  .qtext{flex:1;font-size:16px;word-break:break-word}
+  li.done .qtext{color:var(--faint);text-decoration:line-through}
+  .qdel{opacity:0;color:var(--faint);width:26px;height:26px;display:grid;place-items:center;font-size:18px;flex:none}
+  li.quest:hover .qdel{opacity:1} .qdel:hover{color:var(--hp)}
+  .empty{text-align:center;padding:26px 14px;color:var(--faint);border:3px dashed var(--edge)}
+  .empty b{display:block;color:var(--muted);margin-bottom:4px}
+
+  .progress{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--muted)}
+  #progressText{font-family:var(--num);font-size:13px;color:var(--ink)}
+  .pbar{flex:1;height:12px;background:var(--slot);border:3px solid var(--edge);overflow:hidden}
+  .pbar > i{display:block;height:100%;width:0;background:var(--green);transition:width .4s steps(12)}
+
+  /* timer */
+  .tcard{text-align:center}
+  .modes{display:inline-flex;gap:4px;background:var(--slot);border:3px solid var(--edge);padding:4px;margin:0 auto 6px;
+    box-shadow:inset 2px 2px 0 var(--bevel-dk)}
+  .modes button{font-size:13px;font-weight:700;color:var(--muted);padding:7px 16px}
+  .modes button.active{background:var(--panel2);color:var(--ink);box-shadow:2px 2px 0 var(--shadowc)}
+
+  .ringwrap{position:relative;width:236px;height:236px;margin:14px auto 4px}
+  html[data-theme="dark"] body.focusing .ringwrap, body.focusing .ringwrap{filter:drop-shadow(0 0 14px rgba(156,123,240,.35))}
+  .ringwrap svg{transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:var(--slot);stroke-width:14}
+  .ring-fg{fill:none;stroke:var(--mana);stroke-width:14;transition:stroke-dashoffset .3s linear, stroke .3s}
+  .ringc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .time{font-family:var(--num);font-size:38px;line-height:.9;color:var(--ink);text-shadow:2px 2px 0 var(--shadowc);letter-spacing:0}
+  .tsub{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--faint);font-weight:600;margin-top:8px}
+
+  .tctrl{display:flex;gap:10px;justify-content:center;margin-top:16px}
+  .btn{font-family:var(--body);font-weight:700;font-size:16px;padding:12px 22px;border:3px solid var(--shadowc);
+    box-shadow:4px 4px 0 var(--shadowc)}
+  .btn:active{transform:translate(4px,4px);box-shadow:none}
+  .btn-go{background:var(--mana);color:#fff} .btn-ghost{background:var(--panel2);color:var(--muted);border-color:var(--edge);box-shadow:4px 4px 0 var(--shadowc)}
+  .btn-ghost:hover{color:var(--ink)}
+
+  .presets{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+  .preset{font-family:var(--num);font-size:11px;color:var(--muted);padding:8px 11px;background:var(--slot);border:3px solid var(--edge);
+    box-shadow:2px 2px 0 var(--shadowc)}
+  .preset.active{background:var(--mana);color:#fff;border-color:var(--edge2)}
+  .custom{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:13px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+  .custom input{width:60px;background:var(--slot);border:3px solid var(--edge);padding:7px 4px;text-align:center;font-family:var(--num);font-size:13px;color:var(--ink)}
+  .custom input:focus{outline:none;border-color:var(--mana)}
+
+  .daystats{display:flex;gap:8px;margin-top:16px}
+  .ds{flex:1;background:var(--slot);border:3px solid var(--edge);padding:10px;box-shadow:inset 1px 1px 0 var(--bevel-dk)}
+  .ds .n{font-family:var(--num);font-size:19px;line-height:.9;color:var(--ink)}
+  .ds .l{font-size:12px;color:var(--muted);margin-top:6px}
+
+  /* loot tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:14px}
+  .tab{flex:1;font-size:13px;font-weight:700;color:var(--muted);padding:9px;background:var(--slot);border:3px solid var(--edge);
+    box-shadow:2px 2px 0 var(--shadowc)}
+  .tab.active{background:var(--panel2);color:var(--ink)}
+  .invgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px}
+  .slot{aspect-ratio:1;background:var(--slot);border:3px solid var(--edge);display:grid;place-items:center;position:relative;
+    box-shadow:inset 2px 2px 0 var(--bevel-dk);font-size:24px}
+  .slot.has{border-color:var(--rc)}
+  .slot.empty-slot{opacity:.4;font-size:18px;color:var(--faint)}
+  .slot .cnt{position:absolute;right:-3px;bottom:-3px;background:var(--panel2);border:2px solid var(--shadowc);
+    font-family:var(--num);font-size:10px;font-weight:400;padding:1px 4px;line-height:1.2}
+  .slot .lock{font-size:14px}
+  .invmeta{font-size:13px;color:var(--muted);margin-top:12px}
+  .invmeta b{color:var(--ink)}
+
+  .artrow{display:flex;align-items:center;gap:12px;padding:10px;background:var(--slot);border:3px solid var(--edge);margin-bottom:8px}
+  .artrow.locked{opacity:.55}
+  .artrow .ai{width:42px;height:42px;flex:none;display:grid;place-items:center;font-size:24px;background:var(--panel2);border:3px solid var(--edge)}
+  .artrow.unlocked .ai{border-color:var(--gold)}
+  .artrow .an{font-family:var(--pixel);font-size:11px;color:var(--ink)}
+  .artrow .ab{font-size:13px;color:var(--muted);margin-top:5px}
+  .artrow .areq{margin-left:auto;font-size:12px;color:var(--faint);white-space:nowrap}
+  .artrow.unlocked .areq{color:var(--gold);font-weight:700}
+
+  /* notes + backup */
+  .notes textarea{width:100%;min-height:130px;resize:vertical;background:var(--slot);border:3px solid var(--edge);padding:12px;
+    color:var(--ink);box-shadow:inset 2px 2px 0 var(--bevel-dk);line-height:1.6}
+  .notes textarea:focus{outline:none;border-color:var(--mana)}
+  .savenote{font-size:13px;color:var(--faint);margin-top:8px}
+  .backup{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .backup .ubtn{font-size:13px}
+
+  footer{text-align:center;margin-top:30px;font-size:13px;color:var(--faint)}
+
+  /* ---- toast ---- */
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,160%);z-index:50;max-width:380px;width:calc(100% - 32px);
+    background:var(--panel);border:3px solid var(--edge2);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;
+    box-shadow:inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 5px 5px 0 var(--shadowc);
+    transition:transform .35s steps(6)}
+  .toast.show{transform:translate(-50%,0)}
+  .toast .ic{font-size:24px;flex:none}
+  .toast h4{font-family:var(--pixel);font-size:11px;color:var(--ink);margin-bottom:6px}
+  .toast p{font-size:14px;color:var(--muted)}
+  .toast .x{margin-left:auto;color:var(--faint);font-size:20px} .toast .x:hover{color:var(--ink)}
+
+  /* ---- modal / overlay ---- */
+  .overlay{position:fixed;inset:0;background:rgba(8,6,18,.72);z-index:60;display:grid;place-items:center;padding:18px;
+    opacity:0;pointer-events:none;transition:opacity .2s}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .modal{background:var(--panel);border:4px solid var(--edge2);max-width:440px;width:100%;
+    box-shadow:inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 8px 8px 0 var(--shadowc);
+    max-height:92vh;overflow:auto}
+  .modal .mhead{padding:18px;border-bottom:3px solid var(--edge);text-align:center}
+  .modal .mhead h3{font-family:var(--pixel);font-size:15px;color:var(--ink);text-shadow:2px 2px 0 var(--shadowc)}
+  .modal .mbody{padding:18px}
+  .modal .mfoot{padding:0 18px 18px;display:flex;gap:10px}
+  .modal .mfoot .btn{flex:1;text-align:center}
+
+  /* reward modal pieces */
+  .rw-block{background:var(--slot);border:3px solid var(--edge);padding:14px;margin-bottom:12px;text-align:center}
+  .rw-xp{font-family:var(--num);font-size:21px;line-height:1;color:var(--gold);text-shadow:2px 2px 0 var(--shadowc)}
+  .rw-sub{font-size:13px;color:var(--muted);margin-top:8px}
+  .rw-loot{display:flex;align-items:center;gap:14px;text-align:left}
+  .rw-loot .ic{width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:30px;background:var(--panel2);border:3px solid var(--rc)}
+  .rw-loot .rn{font-family:var(--pixel);font-size:11px;color:var(--ink)}
+  .rw-loot .rr{font-size:13px;font-weight:700;margin-top:6px}
+  .rw-new{display:inline-block;background:var(--gold);color:#2a1d00;font-size:11px;font-weight:700;padding:2px 6px;margin-left:6px;border:2px solid var(--shadowc)}
+  .rw-levelup{background:linear-gradient(180deg, color-mix(in srgb,var(--gold) 22%, var(--slot)), var(--slot));border-color:var(--gold)}
+  .rw-levelup .big{font-family:var(--pixel);font-size:16px;color:var(--gold);text-shadow:2px 2px 0 var(--shadowc)}
+  .rw-arti{border-color:var(--gold)}
+  .rw-arti .ic{font-size:26px}
+
+  /* class select */
+  .classgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  @media(max-width:420px){.classgrid{grid-template-columns:1fr}}
+  .classcard{background:var(--slot);border:3px solid var(--edge);padding:12px;text-align:center;cursor:pointer;position:relative;
+    box-shadow:2px 2px 0 var(--shadowc);transition:transform .05s}
+  .classcard:hover{border-color:var(--edge2)}
+  .classcard.sel{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%, var(--slot))}
+  .classcard .sp{width:64px;height:64px;margin:0 auto 6px}
+  .classcard .sp svg{width:100%;height:100%}
+  .classcard .cn{font-family:var(--pixel);font-size:11px;color:var(--ink)}
+  .classcard .ct{font-size:12px;color:var(--muted);margin:5px 0}
+  .classcard .cp{font-size:12px;font-weight:700;color:var(--mana)}
+  .nameinput{width:100%;background:var(--slot);border:3px solid var(--edge);padding:12px;color:var(--ink);margin-bottom:12px;
+    box-shadow:inset 2px 2px 0 var(--bevel-dk)}
+  .nameinput:focus{outline:none;border-color:var(--mana)}
+
+  /* roster */
+  .rosterlist{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+  .rostcard{display:flex;align-items:center;gap:12px;background:var(--slot);border:3px solid var(--edge);padding:10px;cursor:pointer}
+  .rostcard:hover{border-color:var(--edge2)}
+  .rostcard.active{border-color:var(--gold)}
+  .rostcard .sp{width:48px;height:48px;flex:none;background:var(--panel2);border:3px solid var(--edge)}
+  .rostcard .sp svg{width:100%;height:100%}
+  .rostcard .rn{font-family:var(--pixel);font-size:11px;color:var(--ink)}
+  .rostcard .rt{font-size:12px;color:var(--muted);margin-top:4px}
+  .rostcard .rl{margin-left:auto;text-align:right}
+  .rostcard .rl .lv{font-family:var(--num);font-size:12px;color:var(--gold)}
+  .rostcard .rdel{color:var(--faint);font-size:18px;padding:4px}.rostcard .rdel:hover{color:var(--hp)}
+  .newchar{width:100%;text-align:center;background:var(--mana);color:#fff;border:3px solid var(--edge2);padding:12px;font-weight:700;
+    box-shadow:3px 3px 0 var(--shadowc)}
+  .newchar:active{transform:translate(3px,3px);box-shadow:none}
+
+  /* ---- streak chip ---- */
+  .streak{display:inline-flex;align-items:center;gap:7px;font-family:var(--num);font-size:13px;color:var(--gold);
+    background:var(--panel);border:3px solid var(--edge);padding:5px 11px;cursor:pointer;
+    box-shadow:inset 1px 1px 0 var(--bevel-lt), inset -1px -1px 0 var(--bevel-dk), 3px 3px 0 var(--shadowc)}
+  .streak .fire{font-size:16px;filter:saturate(1.1)}
+  .streak .lbl{font-family:var(--body);font-size:13px;font-weight:600;color:var(--muted)}
+  .streak.cold{color:var(--faint)} .streak.cold .fire{filter:grayscale(1);opacity:.6}
+
+  /* ---- weekly summary ---- */
+  .sum-top{display:flex;gap:10px;margin-bottom:14px}
+  .sum-big{flex:1;background:var(--slot);border:3px solid var(--edge);padding:12px;text-align:center}
+  .sum-big.hot{border-color:var(--gold)}
+  .sum-big .n{font-family:var(--num);font-size:21px;line-height:1;color:var(--ink)}
+  .sum-big.hot .n{color:var(--gold)}
+  .sum-big .l{font-size:12px;color:var(--muted);margin-top:6px}
+  .sum-stats{display:flex;gap:10px;margin-bottom:14px}
+  .sum-stats .st{flex:1;background:var(--slot);border:3px solid var(--edge);padding:10px;text-align:center}
+  .sum-stats .st .n{font-family:var(--num);font-size:16px;color:var(--mana);line-height:1}
+  .sum-stats .st .l{font-size:12px;color:var(--muted);margin-top:5px}
+  .chartlbl{font-family:var(--pixel);font-size:10px;color:var(--faint);margin-bottom:8px}
+  .chart{display:flex;align-items:flex-end;gap:6px;height:110px;background:var(--slot);border:3px solid var(--edge);padding:10px;
+    box-shadow:inset 2px 2px 0 var(--bevel-dk)}
+  .chart .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px}
+  .chart .bar{width:100%;background:var(--mana);min-height:3px;transition:height .4s steps(8)}
+  .chart .col.today .bar{background:var(--gold)}
+  .chart .col.off{opacity:.4}
+  .chart .cd{font-size:11px;color:var(--faint)}
+  .chart .col.today .cd{color:var(--gold);font-weight:700}
+  .chart .bv{font-family:var(--num);font-size:9px;color:var(--muted)}
+
+  /* ---- carry-over banner ---- */
+  .carry{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--gold) 14%, var(--slot));
+    border:3px solid var(--gold);padding:10px 12px;margin-bottom:12px;flex-wrap:wrap}
+  .carry .ct{flex:1;min-width:140px;font-size:14px;color:var(--ink)}
+  .carry .ct b{color:var(--gold)}
+  .carry button{font-size:13px;font-weight:700;padding:7px 11px;border:3px solid var(--shadowc);box-shadow:2px 2px 0 var(--shadowc)}
+  .carry .move{background:var(--gold);color:#2a1d00}
+  .carry .hide{background:var(--panel2);color:var(--muted);border-color:var(--edge);box-shadow:2px 2px 0 var(--shadowc)}
+  .carry button:active{transform:translate(2px,2px);box-shadow:none}
+
+  /* ---- priorities ---- */
+  .priorow{display:flex;align-items:center;gap:7px;margin-bottom:12px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+  .priorow .pl{margin-right:2px}
+  .priob{font-size:14px;font-weight:600;padding:7px 12px;background:var(--slot);border:3px solid var(--edge);color:var(--muted);
+    box-shadow:2px 2px 0 var(--shadowc);display:inline-flex;align-items:center;gap:7px}
+  .priob .pd{width:9px;height:9px;border:2px solid var(--shadowc)}
+  .priob .xpn{font-family:var(--num);font-size:12px;color:var(--ink)}
+  .priob.active{color:var(--ink);background:var(--panel2)}
+  .priob[data-p="low"].active{border-color:var(--green)} .priob[data-p="low"] .pd{background:var(--green)}
+  .priob[data-p="med"].active{border-color:var(--gold)} .priob[data-p="med"] .pd{background:var(--gold)}
+  .priob[data-p="high"].active{border-color:var(--hp)} .priob[data-p="high"] .pd{background:var(--hp)}
+  .ptag{flex:none;width:24px;height:24px;display:grid;place-items:center;border:3px solid var(--edge);background:var(--panel2);
+    cursor:pointer;font-family:var(--body);font-weight:700;font-size:14px;line-height:1}
+  .ptag[data-p="low"]{border-color:var(--green);color:var(--green)}
+  .ptag[data-p="med"]{border-color:var(--gold);color:var(--gold)}
+  .ptag[data-p="high"]{border-color:var(--hp);color:var(--hp)}
+  .qmove{opacity:0;color:var(--gold);width:26px;height:26px;display:grid;place-items:center;font-size:15px;flex:none;font-weight:700}
+  li.quest:hover .qmove{opacity:1} .qmove:hover{filter:brightness(1.2)}
+
+  /* ---- strict focus toggle ---- */
+  .strict{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer}
+  .strict .sw{width:38px;height:20px;background:var(--slot);border:3px solid var(--edge);position:relative;flex:none}
+  .strict .sw i{position:absolute;top:1px;left:1px;width:12px;height:12px;background:var(--faint);transition:left .12s steps(3)}
+  .strict.on .sw{border-color:var(--green)} .strict.on .sw i{left:19px;background:var(--green)}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="glyph"><span>FQ</span></div>
+      <div>
+        <h1>FOCUS QUEST</h1>
+        <p>Trasforma le tue giornate di lavoro in un'avventura.</p>
+      </div>
+    </div>
+    <div class="util">
+      <button class="streak cold" id="streakChip" title="Vedi il riepilogo della settimana"><span class="fire">🔥</span><span id="streakN">0</span><span class="lbl">streak</span></button>
+      <button class="ubtn" id="summaryBtn" title="Riepilogo settimanale">📊 <span>Settimana</span></button>
+      <button class="ubtn" id="themeBtn" title="Cambia tema">🌙 <span id="themeLabel">Notte</span></button>
+      <button class="ubtn off" id="notifBtn" title="Attiva le notifiche"><span class="dot"></span><span id="notifLabel">Notifiche</span></button>
+    </div>
+  </div>
+
+  <!-- HUD personaggio -->
+  <div class="panel pad hud" id="hud">
+    <div class="avatar" id="hudAvatar" title="Apri i personaggi">
+      <div id="hudSprite"></div>
+      <div class="lvlbadge" id="hudLvl">Lv 1</div>
+    </div>
+    <div class="hud-mid">
+      <div class="cname" id="hudName">—</div>
+      <div class="ctitle" id="hudTitle">—</div>
+      <div class="xpbar"><i id="hudXpFill"></i></div>
+      <div class="xptext"><span id="hudXpText">0 / 100 XP</span><span><b id="hudPassive"></b></span></div>
+    </div>
+    <div class="hud-side">
+      <button class="ubtn swapbtn" id="rosterBtn">⇄ Personaggi</button>
+      <button class="ubtn" id="newCharBtn">＋ Nuovo eroe</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div>
+      <section class="panel pad">
+        <div class="head">
+          <div>
+            <div class="eyebrow">MISSIONI</div>
+            <h2 id="dayTitle">Oggi</h2>
+          </div>
+          <div class="daynav">
+            <button class="navb" id="prevDay" aria-label="Giorno precedente">‹</button>
+            <div class="daylabel"><span id="dayName">—</span><small id="dayDate"></small></div>
+            <button class="navb" id="nextDay" aria-label="Giorno successivo">›</button>
+          </div>
+        </div>
+        <button class="todaybtn" id="todayBtn" hidden>↩ Torna a oggi</button>
+        <div id="carrySlot"></div>
+        <div class="addrow">
+          <input id="taskInput" type="text" maxlength="200" autocomplete="off" placeholder="Nuova missione… (XP in base alla priorità)">
+          <button class="addbtn" id="addBtn">+ Aggiungi</button>
+        </div>
+        <div class="priorow" id="prioRow">
+          <span class="pl">Priorità:</span>
+          <button class="priob" data-p="low"><span class="pd"></span>Bassa <b class="xpn">10 XP</b></button>
+          <button class="priob active" data-p="med"><span class="pd"></span>Media <b class="xpn">15 XP</b></button>
+          <button class="priob" data-p="high"><span class="pd"></span>Alta <b class="xpn">25 XP</b></button>
+        </div>
+        <ul class="quests" id="taskList"></ul>
+        <div class="progress" id="progress" hidden>
+          <span id="progressText">0 / 0</span>
+          <div class="pbar"><i id="progressBar"></i></div>
+        </div>
+      </section>
+
+      <section class="panel pad notes">
+        <div class="head"><div><div class="eyebrow">DIARIO</div><h2>Appunti del giorno</h2></div></div>
+        <textarea id="notesArea" placeholder="Annota idee, blocchi, cose da ricordare… si salva da solo."></textarea>
+        <div class="savenote" id="saveStatus">Salvato in locale</div>
+        <div class="backup">
+          <button class="ubtn" id="exportBtn">⬇ Esporta salvataggio</button>
+          <button class="ubtn" id="importBtn">⬆ Importa salvataggio</button>
+          <input type="file" id="importInput" accept="application/json" hidden>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <section class="panel pad tcard">
+        <div class="modes" id="modes">
+          <button data-mode="work" class="active">Focus</button>
+          <button data-mode="break">Pausa</button>
+        </div>
+        <div class="ringwrap">
+          <svg width="236" height="236" viewBox="0 0 236 236">
+            <circle class="ring-bg" cx="118" cy="118" r="106"></circle>
+            <circle class="ring-fg" id="ring" cx="118" cy="118" r="106"></circle>
+          </svg>
+          <div class="ringc">
+            <div class="time" id="time">50:00</div>
+            <div class="tsub" id="tsub">Incantesimo di focus</div>
+          </div>
+        </div>
+        <div class="tctrl">
+          <button class="btn btn-go" id="startPause">Avvia</button>
+          <button class="btn btn-ghost" id="reset">Reset</button>
+        </div>
+        <div class="presets" id="presets">
+          <button class="preset" data-w="25" data-b="5">25 / 5</button>
+          <button class="preset active" data-w="50" data-b="10">50 / 10</button>
+          <button class="preset" data-w="15" data-b="3">15 / 3</button>
+        </div>
+        <div class="custom">
+          <span>Su misura:</span>
+          <input type="number" id="cw" min="1" max="180" value="50"> focus
+          <input type="number" id="cb" min="1" max="60" value="10"> pausa
+        </div>
+        <div class="strict on" id="strictToggle" title="Mette in pausa la sessione se cambi scheda">
+          <span class="sw"><i></i></span><span>Focus rigoroso: pausa se lascio la scheda</span>
+        </div>
+        <div class="daystats">
+          <div class="ds"><div class="n" id="dsS">0</div><div class="l">Sessioni oggi</div></div>
+          <div class="ds"><div class="n" id="dsM">0</div><div class="l">Minuti di focus</div></div>
+          <div class="ds"><div class="n" id="dsQ">0</div><div class="l">Missioni fatte</div></div>
+        </div>
+      </section>
+
+      <section class="panel pad">
+        <div class="tabs">
+          <button class="tab active" data-tab="inv">🎒 Zaino</button>
+          <button class="tab" data-tab="art">✨ Artefatti</button>
+        </div>
+        <div id="tabInv">
+          <div class="invgrid" id="invGrid"></div>
+          <div class="invmeta" id="invMeta"></div>
+        </div>
+        <div id="tabArt" hidden></div>
+      </section>
+    </div>
+  </div>
+
+  <footer>I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast" role="status">
+  <span class="ic" id="toastIc">✨</span>
+  <div><h4 id="toastTitle">Eroe</h4><p id="toastMsg"></p></div>
+  <button class="x" id="toastX" aria-label="Chiudi">×</button>
+</div>
+
+<!-- reward modal -->
+<div class="overlay" id="rewardOv">
+  <div class="modal">
+    <div class="mhead"><h3 id="rwTitle">Sessione completata</h3></div>
+    <div class="mbody" id="rwBody"></div>
+    <div class="mfoot">
+      <button class="btn btn-ghost" id="rwClose">Chiudi</button>
+      <button class="btn btn-go" id="rwNext">Continua</button>
+    </div>
+  </div>
+</div>
+
+<!-- weekly summary -->
+<div class="overlay" id="summaryOv">
+  <div class="modal">
+    <div class="mhead"><h3>Riepilogo della settimana</h3></div>
+    <div class="mbody">
+      <div class="sum-top">
+        <div class="sum-big hot"><div class="n" id="sumStreak">0</div><div class="l">🔥 Streak attuale</div></div>
+        <div class="sum-big"><div class="n" id="sumBest">0</div><div class="l">Record</div></div>
+      </div>
+      <div class="sum-stats">
+        <div class="st"><div class="n" id="sumFocus">0</div><div class="l">min di focus</div></div>
+        <div class="st"><div class="n" id="sumSess">0</div><div class="l">sessioni</div></div>
+        <div class="st"><div class="n" id="sumTasks">0</div><div class="l">missioni</div></div>
+      </div>
+      <div class="chartlbl">FOCUS NEGLI ULTIMI 7 GIORNI (min)</div>
+      <div class="chart" id="sumChart"></div>
+      <div class="strict" id="workWeekToggle" style="margin-top:16px" title="Conta solo i giorni lavorativi: il weekend non spezza lo streak">
+        <span class="sw"><i></i></span><span>Settimana lavorativa: sab e dom non spezzano lo streak</span>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" id="summaryClose" style="flex:1">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- class select / creation -->
+<div class="overlay" id="createOv">
+  <div class="modal">
+    <div class="mhead"><h3>Scegli la tua classe</h3></div>
+    <div class="mbody">
+      <div class="classgrid" id="classGrid"></div>
+      <input class="nameinput" id="charName" maxlength="18" placeholder="Nome dell'eroe…" autocomplete="off">
+      <div class="mfoot" style="padding:0">
+        <button class="btn btn-ghost" id="createCancel" hidden>Annulla</button>
+        <button class="btn btn-go" id="createConfirm">Inizia l'avventura</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- roster -->
+<div class="overlay" id="rosterOv">
+  <div class="modal">
+    <div class="mhead"><h3>I tuoi eroi</h3></div>
+    <div class="mbody">
+      <div class="rosterlist" id="rosterList"></div>
+      <button class="newchar" id="rosterNew">＋ Crea un nuovo eroe</button>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" id="rosterClose" style="flex:1">Chiudi</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var rnd=function(n){return Math.floor(Math.random()*n);};
+  var pick=function(a){return a[rnd(a.length)];};
+
+  /* ============ STORAGE ============ */
+  var KEY="focusquest.v1", OLDKEY="focusgiorno.v1";
+  var hasLS=(function(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}})();
+  function defaults(){return {characters:{},activeId:null,days:{},bestStreak:0,lastBackup:0,settings:{work:50,brk:5,notify:false,theme:"dark",strict:true,workWeek:false}};}
+  function load(){if(!hasLS)return defaults();try{var r=localStorage.getItem(KEY);return r?Object.assign(defaults(),JSON.parse(r)):defaults();}catch(e){return defaults();}}
+  var db=load();
+  // light migration from previous app
+  (function(){ if(!hasLS) return; if(Object.keys(db.days).length) return;
+    try{var o=localStorage.getItem(OLDKEY); if(o){var od=JSON.parse(o); if(od.days)db.days=od.days; if(od.settings){db.settings.work=od.settings.work||50;db.settings.brk=od.settings.break||5;}}}catch(e){}
+  })();
+  var saveT=null;
+  function save(){ if(saveT)clearTimeout(saveT); saveT=setTimeout(function(){ if(hasLS){try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}} },120); }
+
+  /* ============ DATE ============ */
+  function keyOf(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+  function todayKey(){return keyOf(new Date());}
+  function parseKey(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+  var DOW=["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  var MON=["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+  function getDay(k){ if(!db.days[k])db.days[k]={tasks:[],notes:"",sessions:0,focusMin:0}; var d=db.days[k]; if(typeof d.sessions!=="number")d.sessions=0; if(typeof d.focusMin!=="number")d.focusMin=0; return d; }
+  var currentKey=todayKey();
+
+  /* ============ STREAK ============ */
+  function dayCounts(k){ var d=db.days[k]; if(!d)return false; var done=d.tasks?d.tasks.filter(function(t){return t.done;}).length:0; return (d.sessions>0)||(done>0); }
+  function isWeekend(d){ var g=d.getDay(); return g===0||g===6; }
+  function workWeekOn(){ return db.settings.workWeek===true; }
+  function stepBack(d){ do{ d.setDate(d.getDate()-1); } while(workWeekOn() && isWeekend(d)); }
+  function computeStreak(){
+    var ww=workWeekOn(), d=new Date();
+    if(ww){ while(isWeekend(d)) d.setDate(d.getDate()-1); } // weekends are "off": anchor to last workday
+    if(!dayCounts(keyOf(d))){ stepBack(d); if(!dayCounts(keyOf(d))) return 0; } // grace: yesterday's relevant day
+    var n=0; while(dayCounts(keyOf(d))){ n++; stepBack(d); } return n;
+  }
+  function updateStreak(){
+    var s=computeStreak();
+    if(s>(db.bestStreak||0)){ db.bestStreak=s; save(); }
+    var chip=$("streakChip"); if(!chip)return;
+    $("streakN").textContent=s; chip.classList.toggle("cold", s===0);
+    chip.title = s>0 ? s+" giorni di fila — non spezzare la catena!" : "Completa una sessione o una missione per accendere lo streak";
+    return s;
+  }
+
+  /* ============ PRIORITY ============ */
+  var PRIO={ low:{xp:10,label:"Bassa",sym:"B"}, med:{xp:15,label:"Media",sym:"M"}, high:{xp:25,label:"Alta",sym:"A"} };
+  var newPrio="med";
+
+  /* ============ GAME DATA ============ */
+  var SPRITES={
+    mage:{colors:{"1":"#6D45C4","h":"#4E2F92","3":"#FFC53D","S":"#F2C49A","E":"#2A2440","K":"#3A2E22"},rows:[
+      ".....3.....","....111....","...11111...","..1111111..",".hhhhhhhhh.","...SSSSS...","...SESES...","...SSSSS...","..1111111..","..1133111..","..1111111..","...11.11...","...K...K..."]},
+    paladin:{colors:{"G":"#C7CDDC","g":"#8E95AC","3":"#FFC53D","K":"#3A3D4A"},rows:[
+      "...........","..GGGGGGG..",".GGGGGGGGG.",".GGgggggGG.",".GG.....GG.",".GGGGGGGGG.","..GGGGGGG..",".GGGGGGGGG.",".GG3GGG3GG.",".GGGG3GGGG.",".GGGGGGGGG.","...GG.GG...","...K...K..."]},
+    rogue:{colors:{"1":"#3A7A5C","2":"#28543F","S":"#E8B98C","E":"#10331F","W":"#BFF0D0","3":"#FFC53D","K":"#2A2218"},rows:[
+      "...........","...22222...","..2222222..",".222222222.",".22SSSSS22.",".22WEWEW22.",".222SSS222.","..1111111..",".111111111.","..1133311..","..1111111..","...11.11...","...K...K..."]},
+    druid:{colors:{"N":"#4ADE80","n":"#2FA85B","1":"#7A5230","S":"#F2C49A","E":"#2A2440","K":"#3A2E22"},rows:[
+      ".....N.....","....NNN....","...NnNnN...","..NNNNNNN..","..1111111..","...SSSSS...","...SESES...","...SSSSS...","..1111111..",".111NNN111.","..1111111..","...11.11...","...K...K..."]}
+  };
+  function spriteSVG(name){
+    var m=SPRITES[name]; if(!m) return "";
+    var rows=m.rows, w=0, rects="";
+    rows.forEach(function(r){ if(r.length>w)w=r.length; });
+    rows.forEach(function(r,y){ for(var x=0;x<r.length;x++){ var c=r[x]; if(c==="."||c===" ")continue; var col=m.colors[c]; if(!col)continue; rects+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="'+col+'"/>'; }});
+    return '<svg viewBox="0 0 '+w+' '+rows.length+'" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges">'+rects+'</svg>';
+  }
+
+  var CLASSES={
+    cronomante:{name:"Cronomante",title:"Mago del Tempo",sprite:"mage",blurb:"Le sessioni lunghe rendono di più.",passive:"+25% XP focus",focusMult:1.25,taskMult:1,dropMult:1,luck:1},
+    paladino:{name:"Paladino",title:"Cavaliere della Disciplina",sprite:"paladin",blurb:"Ogni missione pesa di più.",passive:"+50% XP missioni",focusMult:1,taskMult:1.5,dropMult:1,luck:1},
+    ladro:{name:"Ladro",title:"Cacciatore di Bottino",sprite:"rogue",blurb:"Mani veloci, tesori migliori.",passive:"+40% drop · +fortuna",focusMult:1,taskMult:1,dropMult:1.4,luck:1.6},
+    druido:{name:"Druido",title:"Custode dell'Equilibrio",sprite:"druid",blurb:"Costanza e armonia in tutto.",passive:"+10% a tutto",focusMult:1.1,taskMult:1.1,dropMult:1.1,luck:1.15}
+  };
+
+  var RAR=["common","uncommon","rare","epic","legendary"];
+  var RAR_IT={common:"Comune",uncommon:"Non comune",rare:"Raro",epic:"Epico",legendary:"Leggendario"};
+  var RAR_C={common:"var(--r-common)",uncommon:"var(--r-uncommon)",rare:"var(--r-rare)",epic:"var(--r-epic)",legendary:"var(--r-legendary)"};
+  var ITEMS=[
+    {key:"clip",name:"Graffetta storta",icon:"📎",rarity:"common"},
+    {key:"mug",name:"Tazza vuota",icon:"☕",rarity:"common"},
+    {key:"postit",name:"Post-it sbiadito",icon:"🗒️",rarity:"common"},
+    {key:"pencil",name:"Matita spezzata",icon:"✏️",rarity:"common"},
+    {key:"dice",name:"Dado scheggiato",icon:"🎲",rarity:"common"},
+    {key:"pen",name:"Penna fortunata",icon:"🖊️",rarity:"uncommon"},
+    {key:"headset",name:"Cuffie antirumore",icon:"🎧",rarity:"uncommon"},
+    {key:"ktimer",name:"Timer da cucina",icon:"⏲️",rarity:"uncommon"},
+    {key:"notebook",name:"Quaderno nuovo",icon:"📒",rarity:"uncommon"},
+    {key:"crystal",name:"Cristallo di concentrazione",icon:"🔷",rarity:"rare"},
+    {key:"potion",name:"Pozione di energia",icon:"🧪",rarity:"rare"},
+    {key:"map",name:"Mappa delle priorità",icon:"🗺️",rarity:"rare"},
+    {key:"sword",name:"Spada della disciplina",icon:"⚔️",rarity:"epic"},
+    {key:"eshield",name:"Scudo anti-distrazione",icon:"🛡️",rarity:"epic"},
+    {key:"ring",name:"Anello del flow",icon:"💍",rarity:"epic"},
+    {key:"hourglass",name:"Clessidra del drago",icon:"⏳",rarity:"legendary"},
+    {key:"chalice",name:"Calice del tempo infinito",icon:"🏆",rarity:"legendary"}
+  ];
+  var ARTIFACTS=[
+    {lvl:2,key:"a_clep",name:"Clessidra Senza Fine",icon:"⏳",blurb:"+5% XP da ogni sessione.",xp:.05},
+    {lvl:4,key:"a_pen",name:"Penna dell'Eterna Lista",icon:"🖋️",blurb:"Le missioni rendono +10% XP.",task:.10},
+    {lvl:6,key:"a_lamp",name:"Lanterna del Mattiniero",icon:"🏮",blurb:"+8% probabilità di bottino.",drop:.08},
+    {lvl:9,key:"a_cloak",name:"Mantello Anti-Distrazione",icon:"🧥",blurb:"Bottino più raro (+fortuna).",luck:1.25},
+    {lvl:12,key:"a_amul",name:"Amuleto del Flow",icon:"🔮",blurb:"+10% XP totale.",xp:.10},
+    {lvl:16,key:"a_gem",name:"Gemma della Costanza",icon:"💎",blurb:"+12% bottino e +fortuna.",drop:.12,luck:1.2},
+    {lvl:20,key:"a_crown",name:"Corona del Sovrano del Tempo",icon:"👑",blurb:"+20% XP. Sei una leggenda.",xp:.20}
+  ];
+  var BASE_XP_MIN=2, TASK_XP=15, BREAK_XP=10, FIRST_FIND=20, BASE_DROP=0.7;
+  function xpToNext(level){ return 100+(level-1)*60; }
+
+  /* ============ CHARACTER LOGIC ============ */
+  function activeChar(){ return db.activeId && db.characters[db.activeId] ? db.characters[db.activeId] : null; }
+  function classDef(ch){ return CLASSES[ch.class]||CLASSES.druido; }
+  function artiEffects(ch){
+    var xp=0,task=0,drop=0,luck=1;
+    (ch.artifacts||[]).forEach(function(k){ var a=ARTIFACTS.find(function(x){return x.key===k;}); if(!a)return;
+      if(a.xp)xp+=a.xp; if(a.task)task+=a.task; if(a.drop)drop+=a.drop; if(a.luck)luck*=a.luck; });
+    return {xpMult:1+xp,taskMult:1+task,dropMult:1+drop,luckMult:luck};
+  }
+  function addXP(ch,amount){
+    var levels=[],unlocked=[]; ch.xp+=amount;
+    while(ch.xp>=xpToNext(ch.level)){ ch.xp-=xpToNext(ch.level); ch.level++; levels.push(ch.level);
+      ARTIFACTS.forEach(function(a){ if(a.lvl===ch.level && ch.artifacts.indexOf(a.key)<0){ ch.artifacts.push(a.key); unlocked.push(a); }}); }
+    return {levels:levels,unlocked:unlocked};
+  }
+  function rollRarity(luck){
+    var base=[55,27,12,5,1], w=base.map(function(b,i){return b*Math.pow(luck,i);}), s=w.reduce(function(a,b){return a+b;},0), r=Math.random()*s;
+    for(var i=0;i<w.length;i++){ r-=w[i]; if(r<=0) return RAR[i]; } return "common";
+  }
+
+  function newCharacter(name,classKey){
+    var id="c"+Date.now()+"-"+rnd(9999);
+    db.characters[id]={id:id,name:name,class:classKey,level:1,xp:0,createdAt:Date.now(),
+      inventory:{},artifacts:[],stats:{sessions:0,focusMin:0,tasksDone:0,drops:0}};
+    db.activeId=id; save();
+  }
+
+  /* ============ RENDER: HUD ============ */
+  function renderHUD(){
+    var ch=activeChar(); if(!ch)return;
+    var cd=classDef(ch);
+    $("hudSprite").innerHTML=spriteSVG(cd.sprite);
+    $("hudLvl").textContent="Lv "+ch.level;
+    $("hudName").textContent=ch.name;
+    $("hudTitle").innerHTML=cd.name+" — <b>"+cd.title+"</b>";
+    var need=xpToNext(ch.level);
+    $("hudXpFill").style.width=Math.min(100,(ch.xp/need*100))+"%";
+    $("hudXpText").textContent=ch.xp+" / "+need+" XP";
+    $("hudPassive").textContent=cd.passive;
+  }
+
+  /* ============ RENDER: tasks/day/notes/stats ============ */
+  function renderHeader(){
+    var d=parseKey(currentKey), isToday=currentKey===todayKey();
+    $("dayName").textContent=DOW[d.getDay()];
+    $("dayDate").textContent=d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear();
+    $("dayTitle").textContent=isToday?"Oggi":DOW[d.getDay()];
+    $("todayBtn").hidden=isToday;
+    var n=$("nextDay"); n.disabled=currentKey>=todayKey();
+  }
+  function renderTasks(){
+    var day=getDay(currentKey), list=$("taskList"), isToday=currentKey===todayKey(); list.innerHTML="";
+    if(!day.tasks.length){
+      var e=document.createElement("li"); e.className="empty";
+      e.innerHTML=isToday?"<b>Nessuna missione per oggi</b>Aggiungi la prima qui sopra.":"<b>Giorno tranquillo</b>Niente di segnato.";
+      list.appendChild(e);
+    } else {
+      day.tasks.forEach(function(t){
+        var prio=t.prio||"med";
+        var li=document.createElement("li"); li.className="quest"+(t.done?" done":"");
+        var c=document.createElement("button"); c.className="check"; c.setAttribute("aria-label","Completa"); c.innerHTML="<b>✓</b>";
+        c.onclick=function(){ toggleTask(t); };
+        var tag=document.createElement("button"); tag.className="ptag"; tag.dataset.p=prio; tag.textContent=PRIO[prio].sym;
+        tag.title="Priorità "+PRIO[prio].label+" ("+PRIO[prio].xp+" XP) — tocca per cambiare";
+        tag.onclick=function(){ var ord=["low","med","high"]; t.prio=ord[(ord.indexOf(prio)+1)%3]; save(); renderTasks(); };
+        var s=document.createElement("span"); s.className="qtext"; s.textContent=t.text;
+        li.appendChild(c); li.appendChild(tag); li.appendChild(s);
+        if(!isToday && !t.done){
+          var mv=document.createElement("button"); mv.className="qmove"; mv.innerHTML="→"; mv.title="Sposta a oggi";
+          mv.onclick=function(){ moveTaskToToday(currentKey,t.id); };
+          li.appendChild(mv);
+        }
+        var del=document.createElement("button"); del.className="qdel"; del.innerHTML="×"; del.setAttribute("aria-label","Elimina");
+        del.onclick=function(){ day.tasks=day.tasks.filter(function(x){return x.id!==t.id;}); save(); renderTasks(); renderDayStats(); updateStreak(); };
+        li.appendChild(del); list.appendChild(li);
+      });
+    }
+    var total=day.tasks.length, done=day.tasks.filter(function(t){return t.done;}).length;
+    $("progress").hidden=total===0; $("progressText").textContent=done+" / "+total;
+    $("progressBar").style.width=total?(done/total*100)+"%":"0%";
+    renderCarry();
+  }
+  function addTask(){
+    var v=$("taskInput").value.trim(); if(!v)return;
+    getDay(currentKey).tasks.push({id:Date.now()+"-"+rnd(99999),text:v,done:false,xpAwarded:false,prio:newPrio});
+    $("taskInput").value=""; save(); renderTasks(); renderDayStats();
+  }
+  function toggleTask(t){
+    t.done=!t.done;
+    if(t.done && !t.xpAwarded){
+      t.xpAwarded=true; var ch=activeChar(); var prio=t.prio||"med";
+      if(ch){ var cd=classDef(ch),ar=artiEffects(ch); var xp=Math.round(PRIO[prio].xp*cd.taskMult*ar.taskMult);
+        var res=addXP(ch,xp); ch.stats.tasksDone++;
+        if(res.levels.length){ jingle("level"); showReward({title:"Missione completata!",xp:xp,xpNote:"priorità "+PRIO[prio].label+(cd.taskMult!==1?" · bonus classe":""),drop:null,levels:res.levels,unlocked:res.unlocked,mode:"task"}); }
+        else { showToast("Missione completata","+"+xp+" XP ("+PRIO[prio].label+"). Avanti il prossimo!","🗡️"); jingle("ding"); }
+        renderHUD();
+      }
+    }
+    save(); renderTasks(); renderDayStats(); updateStreak();
+  }
+
+  /* ============ CARRY-OVER ============ */
+  var carryDismissed=false;
+  function pendingPastTasks(){
+    var out=[], tk=todayKey();
+    Object.keys(db.days).forEach(function(k){ if(k>=tk)return; var d=db.days[k];
+      (d.tasks||[]).forEach(function(t){ if(!t.done) out.push({dayKey:k,task:t}); }); });
+    return out;
+  }
+  function renderCarry(){
+    var slot=$("carrySlot"); slot.innerHTML="";
+    if(currentKey!==todayKey() || carryDismissed) return;
+    var p=pendingPastTasks(); if(!p.length) return;
+    var div=document.createElement("div"); div.className="carry";
+    div.innerHTML='<span class="ct">📋 Hai <b>'+p.length+'</b> '+(p.length===1?"missione in sospeso":"missioni in sospeso")+' dai giorni scorsi.</span>';
+    var move=document.createElement("button"); move.className="move"; move.textContent="Sposta a oggi";
+    move.onclick=function(){ carryAllToToday(); };
+    var hide=document.createElement("button"); hide.className="hide"; hide.textContent="Nascondi";
+    hide.onclick=function(){ carryDismissed=true; renderCarry(); };
+    div.appendChild(move); div.appendChild(hide); slot.appendChild(div);
+  }
+  function moveTaskToToday(fromKey,id){
+    var from=db.days[fromKey]; if(!from)return;
+    var idx=from.tasks.findIndex(function(t){return t.id===id;}); if(idx<0)return;
+    var t=from.tasks.splice(idx,1)[0];
+    getDay(todayKey()).tasks.push({id:Date.now()+"-"+rnd(99999),text:t.text,done:false,xpAwarded:false,prio:t.prio||"med"});
+    save();
+    if(currentKey===fromKey){ renderTasks(); renderDayStats(); }
+    showToast("Spostata a oggi","“"+t.text+"” è di nuovo nella lista di oggi.","→");
+  }
+  function carryAllToToday(){
+    var p=pendingPastTasks(); if(!p.length)return;
+    var tk=todayKey(), today=getDay(tk);
+    p.forEach(function(o){
+      var from=db.days[o.dayKey]; from.tasks=from.tasks.filter(function(x){return x.id!==o.task.id;});
+      today.tasks.push({id:Date.now()+"-"+rnd(99999),text:o.task.text,done:false,xpAwarded:false,prio:o.task.prio||"med"});
+    });
+    save(); carryDismissed=true;
+    if(currentKey===tk){ renderTasks(); renderDayStats(); }
+    showToast("Tutto spostato a oggi",p.length+" "+(p.length===1?"missione riportata":"missioni riportate")+". Niente si perde!","📋");
+  }
+  function renderNotes(){ $("notesArea").value=getDay(currentKey).notes||""; }
+  var noteT=null;
+  function renderDayStats(){
+    var day=getDay(currentKey);
+    $("dsS").textContent=day.sessions; $("dsM").textContent=day.focusMin;
+    $("dsQ").textContent=day.tasks.filter(function(t){return t.done;}).length;
+  }
+
+  /* ============ RENDER: inventory & artifacts ============ */
+  var invTab="inv";
+  function renderInventory(){
+    var ch=activeChar(); if(!ch)return;
+    var grid=$("invGrid"); grid.innerHTML="";
+    // sort items by rarity then name; show all as slots, owned highlighted
+    var order={common:0,uncommon:1,rare:2,epic:3,legendary:4};
+    var sorted=ITEMS.slice().sort(function(a,b){return order[a.rarity]-order[b.rarity];});
+    var owned=0;
+    sorted.forEach(function(it){
+      var cnt=ch.inventory[it.key]||0, slot=document.createElement("div");
+      if(cnt>0){ owned++; slot.className="slot has"; slot.style.setProperty("--rc",RAR_C[it.rarity]);
+        slot.innerHTML=it.icon+'<span class="cnt">×'+cnt+'</span>';
+        slot.title=it.name+" — "+RAR_IT[it.rarity]+" (x"+cnt+")";
+      } else { slot.className="slot empty-slot"; slot.innerHTML="?"; slot.title="Oggetto non ancora trovato"; }
+      grid.appendChild(slot);
+    });
+    $("invMeta").innerHTML="Collezione: <b>"+owned+" / "+ITEMS.length+"</b> oggetti · Bottini totali: <b>"+ch.stats.drops+"</b>";
+  }
+  function renderArtifacts(){
+    var ch=activeChar(); if(!ch)return; var box=$("tabArt"); box.innerHTML="";
+    ARTIFACTS.forEach(function(a){
+      var have=ch.artifacts.indexOf(a.key)>=0, row=document.createElement("div");
+      row.className="artrow "+(have?"unlocked":"locked");
+      row.innerHTML='<div class="ai">'+(have?a.icon:"🔒")+'</div>'+
+        '<div><div class="an">'+a.name+'</div><div class="ab">'+a.blurb+'</div></div>'+
+        '<div class="areq">'+(have?"Sbloccato":"Lv "+a.lvl)+'</div>';
+      box.appendChild(row);
+    });
+  }
+
+  /* ============ TIMER ============ */
+  var R=106, CIRC=2*Math.PI*R; var ring=$("ring"); ring.style.strokeDasharray=CIRC;
+  var mode="work";
+  var durations={work:(db.settings.work||50)*60, brk:(db.settings.brk||5)*60};
+  var total=durations.work, remaining=total, running=false, endAt=0, tick=null, liveT=null;
+  $("cw").value=db.settings.work||50; $("cb").value=db.settings.brk||5;
+
+  function fmt(s){var m=Math.floor(s/60),x=s%60;return String(m).padStart(2,"0")+":"+String(x).padStart(2,"0");}
+  function paintRing(){ ring.style.strokeDashoffset=CIRC*(1-(total?remaining/total:0)); ring.style.stroke=mode==="work"?"var(--mana)":"var(--green)"; }
+  function renderTimer(){
+    $("time").textContent=fmt(remaining);
+    $("tsub").textContent=mode==="work"?"Incantesimo di focus":"Pausa, recupera mana";
+    $("startPause").textContent=running?"Pausa":(remaining<total?"Riprendi":"Avvia");
+    document.title=running?fmt(remaining)+" · Focus Quest":"Focus Quest";
+    document.body.classList.toggle("focusing", running&&mode==="work");
+    paintRing();
+  }
+  function setMode(m,resetTime){
+    mode=m; var k=m==="work"?"work":"brk"; total=durations[k];
+    Array.prototype.forEach.call(document.querySelectorAll("#modes button"),function(b){b.classList.toggle("active",b.dataset.mode===m);});
+    if(resetTime!==false) remaining=total; renderTimer();
+  }
+  function start(){ if(running)return; running=true; endAt=Date.now()+remaining*1000;
+    tick=setInterval(function(){ remaining=Math.max(0,Math.round((endAt-Date.now())/1000));
+      if(remaining<=0){remaining=0;renderTimer();complete();return;} renderTimer(); },250);
+    if(mode==="work") startLive(); renderTimer();
+  }
+  function pause(){ running=false; if(tick)clearInterval(tick); tick=null; stopLive(); renderTimer(); }
+  function reset(){ pause(); remaining=total; renderTimer(); }
+
+  var liveMsgs=["Il tuo eroe è concentrato. Resta sul pezzo!","Niente distrazioni: questo momento è tuo.","Ancora un po', il bottino ti aspetta.","Mente lucida, mana al massimo."];
+  function startLive(){ stopLive(); liveT=setInterval(function(){ if(running&&mode==="work"&&remaining>30) showToast("Continua",pick(liveMsgs),"💪"); }, 5*60*1000); }
+  function stopLive(){ if(liveT){clearInterval(liveT);liveT=null;} }
+
+  /* ---- rewards on completion ---- */
+  function complete(){
+    pause();
+    if(mode==="work"){
+      var ch=activeChar(); if(!ch){ openCreate(false); return; }
+      var cd=classDef(ch), ar=artiEffects(ch), mins=Math.round(durations.work/60);
+      // drop
+      var drop=null, chance=Math.min(.95, BASE_DROP*cd.dropMult*ar.dropMult);
+      if(Math.random()<chance){ var rarity=rollRarity(cd.luck*ar.luckMult), poolp=ITEMS.filter(function(i){return i.rarity===rarity;});
+        var it=pick(poolp), isNew=!ch.inventory[it.key]; drop={item:it,rarity:rarity,isNew:isNew}; }
+      var xp=Math.round(mins*BASE_XP_MIN*cd.focusMult*ar.xpMult); if(drop&&drop.isNew) xp+=FIRST_FIND;
+      var res=addXP(ch,xp);
+      if(drop){ ch.inventory[drop.item.key]=(ch.inventory[drop.item.key]||0)+1; ch.stats.drops++; }
+      ch.stats.sessions++; ch.stats.focusMin+=mins;
+      var day=getDay(currentKey); day.sessions++; day.focusMin+=mins; save();
+      jingle(res.levels.length?"level":(drop?"drop":"ding"));
+      notify("Sessione di focus completata 🎉","+"+xp+" XP"+(drop?" · bottino: "+drop.item.name:"")+(res.levels.length?" · LEVEL UP!":""));
+      showReward({title:"Sessione completata!",xp:xp,xpNote:cd.focusMult!==1?"con bonus di classe":"focus "+mins+" min",drop:drop,levels:res.levels,unlocked:res.unlocked,mode:"work"});
+      renderHUD(); renderInventory(); renderArtifacts(); renderDayStats(); updateStreak();
+    } else {
+      var ch2=activeChar(); var r2={levels:[],unlocked:[]};
+      if(ch2){ r2=addXP(ch2,BREAK_XP); }
+      jingle("ding"); notify("Pausa finita ☕","Torna in missione quando sei pronto. +"+BREAK_XP+" XP.");
+      showReward({title:"Pausa finita",xp:BREAK_XP,xpNote:"recupero",drop:null,levels:r2.levels,unlocked:r2.unlocked,mode:"break"});
+      renderHUD();
+    }
+  }
+
+  /* ============ AUDIO ============ */
+  function jingle(kind){
+    try{
+      var ctx=new (window.AudioContext||window.webkitAudioContext)();
+      var seq= kind==="level"?[523,659,784,1047]: kind==="drop"?[784,988,1319]:[880,1175];
+      seq.forEach(function(f,i){ var o=ctx.createOscillator(),g=ctx.createGain(); o.type="square"; o.frequency.value=f;
+        o.connect(g); g.connect(ctx.destination); var t=ctx.currentTime+i*0.12;
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.14,t+0.01); g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+        o.start(t); o.stop(t+0.24); });
+    }catch(e){}
+  }
+
+  /* ============ TOAST ============ */
+  var toastT=null;
+  function showToast(title,msg,ic){
+    $("toastTitle").textContent=title; $("toastMsg").textContent=msg; $("toastIc").textContent=ic||"✨";
+    $("toast").classList.add("show"); if(toastT)clearTimeout(toastT); toastT=setTimeout(function(){$("toast").classList.remove("show");},5000);
+  }
+
+  /* ============ REWARD MODAL ============ */
+  var pendingNext=null;
+  function showReward(r){
+    $("rwTitle").textContent=r.title;
+    var html='<div class="rw-block"><div class="rw-xp">+'+r.xp+' XP</div><div class="rw-sub">'+r.xpNote+'</div></div>';
+    if(r.drop){
+      var it=r.drop.item, rc=RAR_C[r.drop.rarity];
+      html+='<div class="rw-block rw-loot" style="--rc:'+rc+'"><div class="ic">'+it.icon+'</div>'+
+        '<div><div class="rn">'+it.name+(r.drop.isNew?'<span class="rw-new">NUOVO!</span>':'')+'</div>'+
+        '<div class="rr" style="color:'+rc+'">Bottino '+RAR_IT[r.drop.rarity]+(r.drop.isNew?' · +'+FIRST_FIND+' XP scoperta':'')+'</div></div></div>';
+    } else if(r.mode==="work"){
+      html+='<div class="rw-block rw-sub">Nessun bottino stavolta — la prossima sessione è un nuovo tiro di dadi. 🎲</div>';
+    }
+    if(r.levels && r.levels.length){
+      html+='<div class="rw-block rw-levelup"><div class="big">★ LEVEL UP ★</div><div class="rw-sub">Sei salito al livello '+r.levels[r.levels.length-1]+'!</div></div>';
+    }
+    if(r.unlocked && r.unlocked.length){
+      r.unlocked.forEach(function(a){ html+='<div class="rw-block rw-loot rw-arti"><div class="ic">'+a.icon+'</div>'+
+        '<div><div class="rn">'+a.name+'</div><div class="rr" style="color:var(--gold)">Nuovo artefatto! '+a.blurb+'</div></div></div>'; });
+    }
+    $("rwBody").innerHTML=html;
+    // next button: offer break/focus continuation
+    var nextBtn=$("rwNext");
+    if(r.mode==="work"){ nextBtn.hidden=false; nextBtn.textContent="Inizia la pausa ("+Math.round(durations.brk/60)+"m)"; pendingNext="break"; }
+    else if(r.mode==="break"){ nextBtn.hidden=false; nextBtn.textContent="Nuova sessione di focus"; pendingNext="work"; }
+    else { nextBtn.hidden=true; pendingNext=null; }
+    $("rewardOv").classList.add("show");
+  }
+  function closeReward(){ $("rewardOv").classList.remove("show"); if(pendingNext===null) setMode(mode,true); }
+
+  /* ============ CREATE / ROSTER ============ */
+  var selClass=null;
+  function renderClassGrid(){
+    var g=$("classGrid"); g.innerHTML=""; selClass=null;
+    Object.keys(CLASSES).forEach(function(k){
+      var c=CLASSES[k], card=document.createElement("div"); card.className="classcard"; card.dataset.k=k;
+      card.innerHTML='<div class="sp">'+spriteSVG(c.sprite)+'</div><div class="cn">'+c.name+'</div>'+
+        '<div class="ct">'+c.blurb+'</div><div class="cp">'+c.passive+'</div>';
+      card.onclick=function(){ selClass=k; Array.prototype.forEach.call(g.children,function(x){x.classList.toggle("sel",x.dataset.k===k);}); };
+      g.appendChild(card);
+    });
+  }
+  function openCreate(cancelable){
+    renderClassGrid(); $("charName").value="";
+    $("createCancel").hidden=!cancelable;
+    $("rosterOv").classList.remove("show");
+    $("createOv").classList.add("show");
+    setTimeout(function(){$("charName").focus();},50);
+  }
+  function confirmCreate(){
+    var name=$("charName").value.trim()||"Eroe";
+    if(!selClass){ showToast("Scegli una classe","Tocca una delle quattro classi per iniziare.","⚠️"); return; }
+    newCharacter(name,selClass);
+    $("createOv").classList.remove("show");
+    renderAll(); setMode("work",true);
+    showToast("Benvenuto, "+name+"!","La tua avventura comincia. Completa missioni e sessioni per salire di livello.","⚔️");
+  }
+  function renderRoster(){
+    var list=$("rosterList"); list.innerHTML="";
+    var ids=Object.keys(db.characters);
+    ids.forEach(function(id){
+      var ch=db.characters[id], cd=classDef(ch), need=xpToNext(ch.level);
+      var card=document.createElement("div"); card.className="rostcard"+(id===db.activeId?" active":"");
+      card.innerHTML='<div class="sp">'+spriteSVG(cd.sprite)+'</div>'+
+        '<div><div class="rn">'+ch.name+'</div><div class="rt">'+cd.name+' · '+ch.stats.sessions+' sessioni</div></div>'+
+        '<div class="rl"><div class="lv">Lv '+ch.level+'</div><div class="rt">'+ch.xp+'/'+need+' XP</div></div>';
+      card.onclick=function(ev){ if(ev.target.classList.contains("rdel"))return; db.activeId=id; save(); renderAll(); $("rosterOv").classList.remove("show"); showToast("Eroe selezionato",ch.name+" è ora attivo.","⇄"); };
+      if(ids.length>1){
+        var del=document.createElement("button"); del.className="rdel"; del.innerHTML="🗑"; del.title="Elimina eroe";
+        del.onclick=function(ev){ ev.stopPropagation();
+          if(confirm("Eliminare "+ch.name+"? Progressi, zaino e artefatti andranno persi.")){
+            delete db.characters[id];
+            if(db.activeId===id) db.activeId=Object.keys(db.characters)[0]||null;
+            save(); renderRoster(); renderAll();
+          }};
+        card.querySelector(".rl").appendChild(del);
+      }
+      list.appendChild(card);
+    });
+  }
+
+  /* ============ THEME ============ */
+  function applyTheme(){
+    var t=db.settings.theme||"dark";
+    document.documentElement.setAttribute("data-theme",t);
+    $("themeBtn").innerHTML=(t==="dark"?"🌙 ":"☀️ ")+'<span id="themeLabel">'+(t==="dark"?"Notte":"Giorno")+'</span>';
+  }
+
+  /* ============ NOTIFICATIONS ============ */
+  function refreshNotif(){
+    var b=$("notifBtn"); if(!("Notification" in window)){ $("notifLabel").textContent="Non disponibili"; return; }
+    var p=Notification.permission;
+    b.className="ubtn "+(p==="granted"?"on":"off"); $("notifLabel").textContent=p==="granted"?"Notifiche on":(p==="denied"?"Bloccate":"Notifiche");
+  }
+  function notify(t,b){ if(!("Notification" in window)||Notification.permission!=="granted")return; try{new Notification(t,{body:b});}catch(e){} }
+
+  /* ============ BACKUP ============ */
+  function exportSave(){
+    db.lastBackup=Date.now(); save();
+    var blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}), url=URL.createObjectURL(blob), a=document.createElement("a");
+    a.href=url; a.download="focus-quest-"+todayKey()+".json"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast("Salvataggio esportato","Conserva il file: reimportalo per ripristinare tutto.","💾");
+  }
+  function checkBackupReminder(){
+    var hasData=Object.keys(db.characters).length>0 || Object.keys(db.days).length>0;
+    if(!hasData)return;
+    var last=db.lastBackup||0, twoWeeks=14*24*3600*1000;
+    if(Date.now()-last>twoWeeks){
+      setTimeout(function(){ showToast("Backup consigliato", last? "Sono passate più di due settimane dall'ultimo backup. Esporta il salvataggio per sicurezza.":"Non hai mai esportato un backup. Un file di salvataggio ti protegge se pulisci il browser o cambi PC.","💾"); }, 1400);
+    }
+  }
+  function importSave(file){
+    var r=new FileReader();
+    r.onload=function(){ try{ var data=JSON.parse(r.result);
+      if(!data||typeof data!=="object"||!("days" in data))throw 0;
+      db=Object.assign(defaults(),data); save();
+      durations.work=(db.settings.work||50)*60; durations.brk=(db.settings.brk||5)*60;
+      $("cw").value=db.settings.work||50; $("cb").value=db.settings.brk||5;
+      applyTheme(); applyStrict(); setMode(mode,true); renderAll();
+      showToast("Salvataggio importato","Eroi e progressi ripristinati.","✅");
+    }catch(e){ showToast("File non valido","Non sembra un salvataggio di Focus Quest.","⚠️"); } };
+    r.readAsText(file);
+  }
+
+  /* ============ WEEKLY SUMMARY ============ */
+  function openSummary(){
+    var s=updateStreak();
+    $("sumStreak").textContent=s; $("sumBest").textContent=db.bestStreak||0;
+    var d=new Date(), keys=[]; for(var i=6;i>=0;i--){ var x=new Date(d); x.setDate(d.getDate()-i); keys.push(keyOf(x)); }
+    var tf=0,ts=0,tt=0,maxM=1;
+    keys.forEach(function(k){ var day=db.days[k]; if(day){ tf+=day.focusMin||0; ts+=day.sessions||0; tt+=(day.tasks?day.tasks.filter(function(t){return t.done;}).length:0); if((day.focusMin||0)>maxM)maxM=day.focusMin; }});
+    $("sumFocus").textContent=tf; $("sumSess").textContent=ts; $("sumTasks").textContent=tt;
+    var chart=$("sumChart"); chart.innerHTML=""; var tk=todayKey(), ww=workWeekOn();
+    $("workWeekToggle").classList.toggle("on", ww);
+    keys.forEach(function(k){ var day=db.days[k], m=day?(day.focusMin||0):0, dd=parseKey(k);
+      var col=document.createElement("div"); col.className="col"+(k===tk?" today":"")+(ww&&isWeekend(dd)?" off":"");
+      var h=Math.round(m/maxM*70); var bv=m>0?'<div class="bv">'+m+'</div>':'<div class="bv">·</div>';
+      col.innerHTML=bv+'<div class="bar" style="height:'+(m>0?Math.max(h,6):2)+'px"></div><div class="cd">'+DOW[dd.getDay()].slice(0,3)+'</div>';
+      chart.appendChild(col);
+    });
+    $("summaryOv").classList.add("show");
+  }
+
+  /* ============ RENDER ALL ============ */
+  function renderAll(){ renderHUD(); renderHeader(); renderTasks(); renderNotes(); renderDayStats(); renderInventory(); renderArtifacts(); updateStreak(); }
+
+  /* ============ EVENTS ============ */
+  $("addBtn").onclick=addTask;
+  $("taskInput").addEventListener("keydown",function(e){ if(e.key==="Enter")addTask(); });
+  $("prevDay").onclick=function(){ var d=parseKey(currentKey); d.setDate(d.getDate()-1); currentKey=keyOf(d); renderHeader();renderTasks();renderNotes();renderDayStats(); };
+  $("nextDay").onclick=function(){ if($("nextDay").disabled)return; var d=parseKey(currentKey); d.setDate(d.getDate()+1); var k=keyOf(d); if(k>todayKey())return; currentKey=k; renderHeader();renderTasks();renderNotes();renderDayStats(); };
+  $("todayBtn").onclick=function(){ currentKey=todayKey(); renderHeader();renderTasks();renderNotes();renderDayStats(); };
+  $("notesArea").addEventListener("input",function(){ getDay(currentKey).notes=$("notesArea").value; $("saveStatus").textContent="Salvataggio…"; save(); if(noteT)clearTimeout(noteT); noteT=setTimeout(function(){$("saveStatus").textContent="Salvato in locale";},500); });
+
+  $("startPause").onclick=function(){ running?pause():start(); };
+  $("reset").onclick=reset;
+  $("modes").addEventListener("click",function(e){ var b=e.target.closest("button"); if(!b)return; pause(); setMode(b.dataset.mode,true); });
+  $("presets").addEventListener("click",function(e){ var b=e.target.closest(".preset"); if(!b)return;
+    Array.prototype.forEach.call(document.querySelectorAll(".preset"),function(p){p.classList.remove("active");}); b.classList.add("active");
+    durations.work=(+b.dataset.w)*60; durations.brk=(+b.dataset.b)*60; db.settings.work=+b.dataset.w; db.settings.brk=+b.dataset.b; save();
+    $("cw").value=b.dataset.w; $("cb").value=b.dataset.b; pause(); setMode(mode,true); });
+  function applyCustom(){ var w=Math.min(180,Math.max(1,parseInt($("cw").value)||50)), br=Math.min(60,Math.max(1,parseInt($("cb").value)||5));
+    $("cw").value=w; $("cb").value=br; durations.work=w*60; durations.brk=br*60; db.settings.work=w; db.settings.brk=br; save();
+    Array.prototype.forEach.call(document.querySelectorAll(".preset"),function(p){p.classList.toggle("active",+p.dataset.w===w&&+p.dataset.b===br);});
+    pause(); setMode(mode,true); }
+  $("cw").addEventListener("change",applyCustom); $("cb").addEventListener("change",applyCustom);
+
+  // loot tabs
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){
+    t.onclick=function(){ invTab=t.dataset.tab; Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.classList.toggle("active",x===t);});
+      $("tabInv").hidden=invTab!=="inv"; $("tabArt").hidden=invTab!=="art"; };
+  });
+
+  // reward modal
+  $("rwClose").onclick=closeReward;
+  $("rwNext").onclick=function(){ var go=pendingNext; $("rewardOv").classList.remove("show"); if(go){ setMode(go,true); start(); } };
+  $("rewardOv").addEventListener("click",function(e){ if(e.target===$("rewardOv")) closeReward(); });
+
+  // create/roster
+  $("rosterBtn").onclick=function(){ renderRoster(); $("rosterOv").classList.add("show"); };
+  $("hudAvatar").onclick=function(){ renderRoster(); $("rosterOv").classList.add("show"); };
+  $("newCharBtn").onclick=function(){ openCreate(true); };
+  $("rosterNew").onclick=function(){ openCreate(true); };
+  $("rosterClose").onclick=function(){ $("rosterOv").classList.remove("show"); };
+  $("createConfirm").onclick=confirmCreate;
+  $("createCancel").onclick=function(){ $("createOv").classList.remove("show"); };
+  $("charName").addEventListener("keydown",function(e){ if(e.key==="Enter")confirmCreate(); });
+
+  // theme + notif + backup
+  $("themeBtn").onclick=function(){ db.settings.theme=(db.settings.theme==="dark")?"light":"dark"; save(); applyTheme(); };
+  $("notifBtn").onclick=function(){ if(!("Notification" in window))return;
+    if(Notification.permission==="granted"){ showToast("Già attive","Ti avviso a fine timer.","🔔"); return; }
+    Notification.requestPermission().then(function(p){ refreshNotif(); db.settings.notify=(p==="granted"); save();
+      if(p==="granted"){ showToast("Notifiche attive","Ti avviso quando una sessione finisce.","🔔"); notify("Notifiche attive ✓","Funziona!"); } }); };
+  $("exportBtn").onclick=exportSave;
+  $("importBtn").onclick=function(){ $("importInput").click(); };
+  $("importInput").onchange=function(e){ var f=e.target.files[0]; if(f)importSave(f); e.target.value=""; };
+
+  // priority picker
+  $("prioRow").addEventListener("click",function(e){ var b=e.target.closest(".priob"); if(!b)return; newPrio=b.dataset.p;
+    Array.prototype.forEach.call(document.querySelectorAll("#prioRow .priob"),function(x){x.classList.toggle("active",x===b);}); });
+
+  // streak + weekly summary
+  $("streakChip").onclick=openSummary;
+  $("summaryBtn").onclick=openSummary;
+  $("summaryClose").onclick=function(){ $("summaryOv").classList.remove("show"); };
+  $("summaryOv").addEventListener("click",function(e){ if(e.target===$("summaryOv")) $("summaryOv").classList.remove("show"); });
+
+  // strict focus toggle
+  function applyStrict(){ $("strictToggle").classList.toggle("on", db.settings.strict!==false); }
+  $("strictToggle").onclick=function(){ db.settings.strict=(db.settings.strict===false); save(); applyStrict();
+    showToast(db.settings.strict?"Focus rigoroso attivo":"Focus rigoroso disattivato",
+      db.settings.strict?"Se lasci la scheda durante una sessione di focus, il timer si mette in pausa.":"Il timer continua anche cambiando scheda (utile se lavori fuori dal browser).","🔒"); };
+
+  // work-week toggle (inside summary)
+  $("workWeekToggle").onclick=function(){ db.settings.workWeek=!workWeekOn(); save(); updateStreak(); openSummary();
+    showToast(workWeekOn()?"Settimana lavorativa attiva":"Streak su tutti i giorni",
+      workWeekOn()?"Sabato e domenica non spezzano più lo streak. Lo streak conta i giorni lavorativi.":"Lo streak ora richiede attività ogni giorno, weekend compresi.","📅"); };
+
+  // pause on tab switch (strict focus)
+  var hiddenPause=false;
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){ if(running && mode==="work" && db.settings.strict!==false){ pause(); hiddenPause=true; } }
+    else if(hiddenPause){ hiddenPause=false; showToast("Sessione in pausa","Avevi lasciato la scheda: il focus rigoroso ha fermato il timer. Riprendi quando vuoi.","👀"); }
+  });
+
+  window.addEventListener("beforeunload",function(e){ if(running){ e.preventDefault(); e.returnValue=""; } });
+
+  /* ============ INIT ============ */
+  applyTheme(); refreshNotif(); applyStrict(); setMode("work",true); updateStreak(); checkBackupReminder();
+  if(!activeChar()){ openCreate(false); } else { renderAll(); }
+})();
+</script>
+</body>
+</html>
