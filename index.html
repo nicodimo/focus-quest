@@ -517,7 +517,7 @@
     </div>
   </div>
 
-  <footer>I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
+  <footer>Focus Quest <b id="verTag">v1.0.0</b> · I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
 </div>
 
 <!-- toast -->
@@ -599,6 +599,7 @@
 
   /* ============ STORAGE ============ */
   var KEY="focusquest.v1", OLDKEY="focusgiorno.v1";
+  var APP_VERSION="1.0.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
   var hasLS=(function(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}})();
   function defaults(){return {characters:{},activeId:null,days:{},bestStreak:0,lastBackup:0,settings:{work:50,brk:5,notify:false,theme:"dark",strict:true,workWeek:false}};}
   function load(){if(!hasLS)return defaults();try{var r=localStorage.getItem(KEY);return r?Object.assign(defaults(),JSON.parse(r)):defaults();}catch(e){return defaults();}}
@@ -1193,6 +1194,11 @@
   window.addEventListener("beforeunload",function(e){ if(running){ e.preventDefault(); e.returnValue=""; } });
 
   /* ============ INIT ============ */
+  var verEl=$("verTag"); if(verEl) verEl.textContent="v"+APP_VERSION;
+  (function(){ var prev=db.lastVersion;
+    if(prev && prev!==APP_VERSION){ setTimeout(function(){ showToast("Aggiornato!","Questo PC è passato dalla versione "+prev+" alla "+APP_VERSION+". I tuoi progressi sono al sicuro.","⬆️"); }, 900); }
+    db.lastVersion=APP_VERSION; save();
+  })();
   applyTheme(); refreshNotif(); applyStrict(); setMode("work",true); updateStreak(); checkBackupReminder();
   if(!activeChar()){ openCreate(false); } else { renderAll(); }
 })();
