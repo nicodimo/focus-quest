@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Focus Quest — il tuo lavoro è un'avventura</title>
+<title>Focus Quest - il tuo lavoro è un'avventura</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNiAxNicgc2hhcGUtcmVuZGVyaW5nPSdjcmlzcEVkZ2VzJz48cmVjdCB3aWR0aD0nMTYnIGhlaWdodD0nMTYnIHJ4PSczJyBmaWxsPScjNUIzRkIwJy8+PHJlY3QgeD0nNycgeT0nMScgd2lkdGg9JzInIGhlaWdodD0nOScgZmlsbD0nI0ZGQzUzRCcvPjxyZWN0IHg9JzcnIHk9JzEnIHdpZHRoPScxJyBoZWlnaHQ9JzknIGZpbGw9JyNGRkUwN0EnLz48cmVjdCB4PSc0JyB5PSc5JyB3aWR0aD0nOCcgaGVpZ2h0PScyJyBmaWxsPScjRkZDNTNEJy8+PHJlY3QgeD0nNycgeT0nMTEnIHdpZHRoPScyJyBoZWlnaHQ9JzMnIGZpbGw9JyM0RTJGOTInLz48cmVjdCB4PSc2JyB5PScxMycgd2lkdGg9JzQnIGhlaWdodD0nMicgZmlsbD0nI0ZGQzUzRCcvPjwvc3ZnPgo=">
 <meta name="theme-color" content="#5B3FB0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -244,7 +244,7 @@
   footer{text-align:center;margin-top:30px;font-size:13px;color:var(--faint)}
 
   /* ---- toast ---- */
-  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,160%);z-index:50;max-width:380px;width:calc(100% - 32px);
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,160%);z-index:80;max-width:380px;width:calc(100% - 32px);
     background:var(--panel);border:3px solid var(--edge2);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;
     box-shadow:inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 5px 5px 0 var(--shadowc);
     transition:transform .35s steps(6)}
@@ -378,6 +378,42 @@
   .strict .sw i{position:absolute;top:1px;left:1px;width:12px;height:12px;background:var(--faint);transition:left .12s steps(3)}
   .strict.on .sw{border-color:var(--green)} .strict.on .sw i{left:19px;background:var(--green)}
 
+  /* ---- daily quests ---- */
+  .qlock{padding:18px 14px;text-align:center;color:var(--muted);border:3px dashed var(--edge);font-size:14px;line-height:1.5}
+  .qlock b{color:var(--gold)} .qlock span{font-size:13px;color:var(--faint)}
+  .qfull{font-family:var(--num);font-size:12px;color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,var(--slot));border:3px solid var(--gold);padding:5px 9px}
+  .qrow{display:flex;align-items:center;gap:11px;padding:10px;background:var(--slot);border:3px solid var(--edge);margin-bottom:8px}
+  .qrow.done{border-color:var(--green);background:color-mix(in srgb,var(--green) 12%,var(--slot))}
+  .qrow .qic{width:34px;height:34px;flex:none;display:grid;place-items:center;font-size:20px;background:var(--panel2);border:3px solid var(--edge)}
+  .qrow.done .qic{border-color:var(--green)}
+  .qmain{flex:1;min-width:0}
+  .qmain .qd{font-size:14px;color:var(--ink);margin-bottom:6px}
+  .qbar{height:9px;background:var(--panel);border:2px solid var(--edge);overflow:hidden}
+  .qbar > i{display:block;height:100%;width:0;background:var(--gold);transition:width .4s steps(10)}
+  .qrow.done .qbar > i{background:var(--green)}
+  .qside{text-align:right;flex:none}
+  .qside .qprog{font-family:var(--num);font-size:13px;color:var(--ink)}
+  .qside .qrew{font-size:12px;color:var(--gold);font-weight:600;margin-top:3px}
+  .qcheck{flex:none;width:26px;height:26px;display:grid;place-items:center;background:var(--green);color:#fff;border:3px solid var(--green);font-weight:700}
+  .qbonus{margin-top:4px;padding:9px;text-align:center;font-size:13px;color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--slot));border:3px solid var(--gold)}
+
+  /* ---- focus history grid ---- */
+  .fgrid-wrap{overflow-x:auto;padding-bottom:4px}
+  .fgrid{display:flex;gap:3px;min-width:max-content}
+  .gcol{display:flex;flex-direction:column;gap:3px}
+  .gcell{width:12px;height:12px;background:var(--slot);border:1px solid var(--edge)}
+  .gcell.l0{background:var(--slot)}
+  .gcell.l1{background:color-mix(in srgb,var(--mana) 28%, var(--slot))}
+  .gcell.l2{background:color-mix(in srgb,var(--mana) 52%, var(--slot))}
+  .gcell.l3{background:color-mix(in srgb,var(--mana) 76%, var(--slot))}
+  .gcell.l4{background:var(--mana)}
+  .gcell.today{border-color:var(--gold)}
+  .gcell.fut{background:transparent;border-color:transparent}
+  .glegend{display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-top:8px;font-size:12px;color:var(--faint);flex-wrap:wrap}
+  .glegend .gl{margin:0 2px}
+  .glegend #gridMeta{margin-right:auto;color:var(--muted)}
+  .glegend #gridMeta b{color:var(--ink)}
+
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -394,7 +430,7 @@
     </div>
     <div class="util">
       <button class="streak cold" id="streakChip" title="Vedi il riepilogo della settimana"><span class="fire">🔥</span><span id="streakN">0</span><span class="lbl">streak</span></button>
-      <button class="ubtn" id="summaryBtn" title="Riepilogo settimanale">📊 <span>Settimana</span></button>
+      <button class="ubtn" id="summaryBtn" title="Statistiche e storico">📊 <span>Statistiche</span></button>
       <button class="ubtn" id="themeBtn" title="Cambia tema">🌙 <span id="themeLabel">Notte</span></button>
       <button class="ubtn off" id="notifBtn" title="Attiva le notifiche"><span class="dot"></span><span id="notifLabel">Notifiche</span></button>
     </div>
@@ -451,6 +487,8 @@
           <div class="pbar"><i id="progressBar"></i></div>
         </div>
       </section>
+
+      <section class="panel pad" id="questPanel" hidden></section>
 
       <section class="panel pad notes">
         <div class="head"><div><div class="eyebrow">DIARIO</div><h2>Appunti del giorno</h2></div></div>
@@ -519,7 +557,7 @@
     </div>
   </div>
 
-  <footer>Focus Quest <b id="verTag">v1.0.0</b> · I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
+  <footer>Focus Quest <b id="verTag">v1.1.0</b> · I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
 </div>
 
 <!-- toast -->
@@ -544,7 +582,7 @@
 <!-- weekly summary -->
 <div class="overlay" id="summaryOv">
   <div class="modal">
-    <div class="mhead"><h3>Riepilogo della settimana</h3></div>
+    <div class="mhead"><h3>Statistiche</h3></div>
     <div class="mbody">
       <div class="sum-top">
         <div class="sum-big hot"><div class="n" id="sumStreak">0</div><div class="l">🔥 Streak attuale</div></div>
@@ -557,6 +595,9 @@
       </div>
       <div class="chartlbl">FOCUS NEGLI ULTIMI 7 GIORNI (min)</div>
       <div class="chart" id="sumChart"></div>
+      <div class="chartlbl" style="margin-top:18px">FOCUS — ULTIMI 6 MESI</div>
+      <div class="fgrid-wrap"><div class="fgrid" id="focusGrid"></div></div>
+      <div class="glegend"><span id="gridMeta"></span><span class="gl">meno</span><span class="gcell l1"></span><span class="gcell l2"></span><span class="gcell l3"></span><span class="gcell l4"></span><span class="gl">più</span></div>
       <div class="strict" id="workWeekToggle" style="margin-top:16px" title="Conta solo i giorni lavorativi: il weekend non spezza lo streak">
         <span class="sw"><i></i></span><span>Settimana lavorativa: sab e dom non spezzano lo streak</span>
       </div>
@@ -601,7 +642,7 @@
 
   /* ============ STORAGE ============ */
   var KEY="focusquest.v1", OLDKEY="focusgiorno.v1";
-  var APP_VERSION="1.0.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
+  var APP_VERSION="1.1.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
   var hasLS=(function(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}})();
   function defaults(){return {characters:{},activeId:null,days:{},bestStreak:0,lastBackup:0,settings:{work:50,brk:5,notify:false,theme:"dark",strict:true,workWeek:false}};}
   function load(){if(!hasLS)return defaults();try{var r=localStorage.getItem(KEY);return r?Object.assign(defaults(),JSON.parse(r)):defaults();}catch(e){return defaults();}}
@@ -704,6 +745,8 @@
     {lvl:20,key:"a_crown",name:"Corona del Sovrano del Tempo",icon:"👑",blurb:"+20% XP. Sei una leggenda.",xp:.20}
   ];
   var BASE_XP_MIN=2, TASK_XP=15, BREAK_XP=10, FIRST_FIND=20, BASE_DROP=0.7;
+  var QUEST_UNLOCK_LEVEL=3, DUNGEON_UNLOCK_LEVEL=8;
+  var QUEST_REWARD={easy:20, med:40, challenge:60}, QUEST_FULLDAY_XP=60;
   function xpToNext(level){ return 100+(level-1)*60; }
 
   /* ============ CHARACTER LOGIC ============ */
@@ -805,6 +848,7 @@
       }
     }
     save(); renderTasks(); renderDayStats(); updateStreak();
+    announceQuests(checkQuests());
   }
 
   /* ============ CARRY-OVER ============ */
@@ -939,6 +983,7 @@
       notify("Sessione di focus completata 🎉","+"+xp+" XP"+(drop?" · bottino: "+drop.item.name:"")+(res.levels.length?" · LEVEL UP!":""));
       showReward({title:"Sessione completata!",xp:xp,xpNote:cd.focusMult!==1?"con bonus di classe":"focus "+mins+" min",drop:drop,levels:res.levels,unlocked:res.unlocked,mode:"work"});
       renderHUD(); renderInventory(); renderArtifacts(); renderDayStats(); updateStreak();
+      announceQuests(checkQuests());
     } else {
       var ch2=activeChar(); var r2={levels:[],unlocked:[]};
       if(ch2){ r2=addXP(ch2,BREAK_XP); }
@@ -960,12 +1005,15 @@
     }catch(e){}
   }
 
-  /* ============ TOAST ============ */
-  var toastT=null;
-  function showToast(title,msg,ic){
-    $("toastTitle").textContent=title; $("toastMsg").textContent=msg; $("toastIc").textContent=ic||"✨";
-    $("toast").classList.add("show"); if(toastT)clearTimeout(toastT); toastT=setTimeout(function(){$("toast").classList.remove("show");},5000);
+  /* ============ TOAST (queue) ============ */
+  var toastT=null, toastQ=[], toastBusy=false;
+  function showToast(title,msg,ic){ toastQ.push([title,msg,ic||"✨"]); if(toastQ.length>5)toastQ.shift(); pumpToast(); }
+  function pumpToast(){ if(toastBusy)return; var n=toastQ.shift(); if(!n)return; toastBusy=true;
+    $("toastTitle").textContent=n[0]; $("toastMsg").textContent=n[1]; $("toastIc").textContent=n[2];
+    $("toast").classList.add("show");
+    toastT=setTimeout(function(){ $("toast").classList.remove("show"); setTimeout(function(){ toastBusy=false; pumpToast(); },380); },4200);
   }
+  function dismissToast(){ if(toastT)clearTimeout(toastT); $("toast").classList.remove("show"); setTimeout(function(){ toastBusy=false; pumpToast(); },380); }
 
   /* ============ REWARD MODAL ============ */
   var pendingNext=null;
@@ -1107,11 +1155,128 @@
       col.innerHTML=bv+'<div class="bar" style="height:'+(m>0?Math.max(h,6):2)+'px"></div><div class="cd">'+DOW[dd.getDay()].slice(0,3)+'</div>';
       chart.appendChild(col);
     });
+    renderFocusGrid();
     $("summaryOv").classList.add("show");
   }
 
+  /* ============ DAILY QUESTS ============ */
+  var QMETA={
+    sessions:{icon:"⚔️",label:function(n){return "Completa "+n+" "+(n===1?"sessione di focus":"sessioni di focus");},min:1,max:6,step:1},
+    focusMin:{icon:"⏳",label:function(n){return "Accumula "+n+" minuti di focus";},min:20,max:240,step:10},
+    tasks:{icon:"📜",label:function(n){return "Completa "+n+" "+(n===1?"missione":"missioni");},min:1,max:8,step:1},
+    hipri:{icon:"🔥",label:function(n){return "Completa "+n+" "+(n===1?"missione ad alta priorità":"missioni ad alta priorità");},min:1,max:4,step:1}
+  };
+  function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t; } return a; }
+  function median(arr){ if(!arr.length)return 0; var s=arr.slice().sort(function(a,b){return a-b;}),m=Math.floor(s.length/2); return s.length%2?s[m]:(s[m-1]+s[m])/2; }
+  function dayStatsOf(day){ var done=(day.tasks||[]).filter(function(t){return t.done;}); return {sessions:day.sessions||0,focusMin:day.focusMin||0,tasks:done.length,hipri:done.filter(function(t){return (t.prio||"med")==="high";}).length}; }
+  function dayProgress(k){ return dayStatsOf(getDay(k)); }
+  function activeHistory(){ var out=[],d=new Date(),scanned=0; d.setDate(d.getDate()-1);
+    while(out.length<14 && scanned<60){ var k=keyOf(d); if(db.days[k] && dayCounts(k)) out.push(dayStatsOf(db.days[k])); d.setDate(d.getDate()-1); scanned++; } return out; }
+  function clampStep(v,meta){ var x=Math.round(v/meta.step)*meta.step; return Math.max(meta.min,Math.min(meta.max,x)); }
+  function generateQuests(){
+    var hist=activeHistory(), beginner=hist.length<3;
+    var med={sessions:median(hist.map(function(h){return h.sessions;})),focusMin:median(hist.map(function(h){return h.focusMin;})),
+             tasks:median(hist.map(function(h){return h.tasks;})),hipri:median(hist.map(function(h){return h.hipri;}))};
+    var metrics=["sessions","focusMin","tasks"]; if(med.hipri>=1) metrics.push("hipri");
+    var eligible=metrics.filter(function(m){ return beginner || med[m]>0; });
+    ["focusMin","sessions"].forEach(function(m){ if(eligible.indexOf(m)<0) eligible.unshift(m); });
+    eligible=shuffle(eligible);
+    var chosen=[],i=0; while(chosen.length<3 && i<30){ chosen.push(eligible[i%eligible.length]); i++; }
+    var tiers=["easy","med","challenge"], mult={easy:0.8,med:1.0,challenge:1.25};
+    return chosen.map(function(metric,idx){
+      var tier=tiers[idx], meta=QMETA[metric], target;
+      if(beginner){ var gentle={easy:meta.min, med:(metric==="focusMin"?25:2), challenge:(metric==="focusMin"?40:3)}; target=clampStep(gentle[tier],meta); }
+      else { target=clampStep((med[metric]||meta.min)*mult[tier],meta); }
+      return {id:"q"+idx+"-"+Date.now()+rnd(999),metric:metric,tier:tier,target:target,reward:QUEST_REWARD[tier],claimed:false};
+    });
+  }
+  function ensureQuests(){ var ch=activeChar(); if(!ch||ch.level<QUEST_UNLOCK_LEVEL)return; var day=getDay(todayKey());
+    if(!day.quests){ day.quests=generateQuests(); day.questBonus=false; save(); } }
+  function grantLoot(ch,minRarity){
+    var cd=classDef(ch),ar=artiEffects(ch),rarity=rollRarity(cd.luck*ar.luckMult);
+    if(minRarity){ if(RAR.indexOf(rarity)<RAR.indexOf(minRarity)) rarity=minRarity; }
+    var it=pick(ITEMS.filter(function(i){return i.rarity===rarity;})), isNew=!ch.inventory[it.key];
+    ch.inventory[it.key]=(ch.inventory[it.key]||0)+1; ch.stats.drops++;
+    return {item:it,rarity:rarity,isNew:isNew};
+  }
+  function checkQuests(){
+    var ch=activeChar(); if(!ch||ch.level<QUEST_UNLOCK_LEVEL)return null;
+    ensureQuests(); var day=getDay(todayKey()); if(!day.quests)return null;
+    var prog=dayProgress(todayKey()), claimed=[], bonus=null;
+    day.quests.forEach(function(q){ if(q.claimed)return;
+      if(prog[q.metric]>=q.target){ q.claimed=true; var r=addXP(ch,q.reward);
+        var loot=q.tier==="challenge"?grantLoot(ch,null):null;
+        claimed.push({q:q,loot:loot,levels:r.levels,unlocked:r.unlocked}); } });
+    if(day.quests.length && day.quests.every(function(q){return q.claimed;}) && !day.questBonus){
+      day.questBonus=true; var rb=addXP(ch,QUEST_FULLDAY_XP), bl=grantLoot(ch,"rare");
+      bonus={xp:QUEST_FULLDAY_XP,loot:bl,levels:rb.levels,unlocked:rb.unlocked}; }
+    if(claimed.length||bonus){ save(); return {claimed:claimed,bonus:bonus}; }
+    return null;
+  }
+  function announceQuests(res){
+    if(!res)return; var lv=[],arts=[];
+    res.claimed.forEach(function(c){ var meta=QMETA[c.q.metric];
+      showToast("🗺️ Quest completata", meta.label(c.q.target)+" — +"+c.q.reward+" XP"+(c.loot?" · bottino: "+c.loot.item.name:""), "🗺️");
+      lv=lv.concat(c.levels); arts=arts.concat(c.unlocked); });
+    if(res.bonus){ showToast("★ Giornata completa! ★","Tutte le quest fatte: +"+res.bonus.xp+" XP e bottino "+RAR_IT[res.bonus.loot.rarity]+"!","🏆");
+      lv=lv.concat(res.bonus.levels); arts=arts.concat(res.bonus.unlocked); }
+    if(lv.length){ jingle("level"); showToast("★ LEVEL UP ★","Sei salito al livello "+lv[lv.length-1]+"!","⬆️"); }
+    else { jingle(res.bonus?"drop":"ding"); }
+    arts.forEach(function(a){ showToast("Nuovo artefatto!", a.name+" — "+a.blurb, a.icon); });
+    renderHUD(); renderInventory(); renderArtifacts(); renderQuests();
+  }
+  function renderQuests(){
+    var panel=$("questPanel"), ch=activeChar();
+    if(!ch){ panel.hidden=true; return; }
+    if(ch.level<QUEST_UNLOCK_LEVEL){ panel.hidden=false;
+      panel.innerHTML='<div class="head"><div><div class="eyebrow">QUEST</div><h2>Quest del giorno</h2></div></div>'+
+        '<div class="qlock">🔒 Le quest giornaliere si sbloccano al <b>livello '+QUEST_UNLOCK_LEVEL+'</b>.<br><span>Completa sessioni e missioni per arrivarci — così avrai anche uno storico su cui tararle.</span></div>';
+      return;
+    }
+    if(!db.questsAnnounced){ db.questsAnnounced=true; save(); showToast("🗺️ Quest sbloccate!","Da ora ogni giorno trovi 3 quest tarate sul tuo ritmo. Completale tutte per il bonus giornata.","🗺️"); }
+    if(currentKey!==todayKey()){ panel.hidden=true; return; }
+    ensureQuests(); var day=getDay(todayKey()); if(!day.quests){ panel.hidden=true; return; }
+    panel.hidden=false;
+    var prog=dayProgress(todayKey()), allDone=day.quests.every(function(q){return q.claimed;});
+    var html='<div class="head"><div><div class="eyebrow">QUEST</div><h2>Quest del giorno</h2></div>'+(allDone?'<span class="qfull">★ Completa</span>':'')+'</div>';
+    day.quests.forEach(function(q){ var meta=QMETA[q.metric], cur=Math.min(prog[q.metric],q.target), pct=Math.round(cur/q.target*100);
+      html+='<div class="qrow'+(q.claimed?" done":"")+'"><div class="qic">'+meta.icon+'</div>'+
+        '<div class="qmain"><div class="qd">'+meta.label(q.target)+'</div><div class="qbar"><i style="width:'+pct+'%"></i></div></div>'+
+        '<div class="qside"><div class="qprog">'+cur+' / '+q.target+'</div><div class="qrew">+'+q.reward+' XP'+(q.tier==="challenge"?" 🎁":"")+'</div></div>'+
+        (q.claimed?'<div class="qcheck">✓</div>':'')+'</div>';
+    });
+    if(day.questBonus) html+='<div class="qbonus">🏆 Bonus giornata completa: +'+QUEST_FULLDAY_XP+' XP + bottino raro riscossi!</div>';
+    panel.innerHTML=html;
+  }
+
+  /* ============ FOCUS HISTORY GRID ============ */
+  function renderFocusGrid(){
+    var box=$("focusGrid"); if(!box)return; box.innerHTML="";
+    var weeks=26, tk=todayKey(), today=new Date(); today.setHours(0,0,0,0);
+    var start=new Date(today); start.setDate(start.getDate()-(weeks*7-1));
+    while(start.getDay()!==1) start.setDate(start.getDate()-1);
+    var last=new Date(today); while(last.getDay()!==0) last.setDate(last.getDate()+1);
+    var max=1, days=[], total=0, active=0;
+    for(var d=new Date(start); d<=last; d.setDate(d.getDate()+1)){
+      var k=keyOf(d), day=db.days[k], min=day?(day.focusMin||0):0, future=(d>today);
+      days.push({k:k,min:min,future:future,date:new Date(d)});
+      if(!future){ if(min>max)max=min; total+=min; if(min>0)active++; }
+    }
+    for(var w=0; w<days.length; w+=7){
+      var col=document.createElement("div"); col.className="gcol";
+      days.slice(w,w+7).forEach(function(cell){ var g=document.createElement("div");
+        if(cell.future){ g.className="gcell fut"; }
+        else { var lvl=cell.min<=0?0:(cell.min>=max?4:Math.max(1,Math.ceil(cell.min/max*4)));
+          g.className="gcell l"+lvl+(cell.k===tk?" today":"");
+          var dd=cell.date; g.title=dd.getDate()+" "+MON[dd.getMonth()]+" "+dd.getFullYear()+" — "+cell.min+" min"; }
+        col.appendChild(g); });
+      box.appendChild(col);
+    }
+    var meta=$("gridMeta"); if(meta) meta.innerHTML="Totale: <b>"+total+" min</b> · Giorni attivi: <b>"+active+"</b>";
+  }
+
   /* ============ RENDER ALL ============ */
-  function renderAll(){ renderHUD(); renderHeader(); renderTasks(); renderNotes(); renderDayStats(); renderInventory(); renderArtifacts(); updateStreak(); }
+  function renderAll(){ renderHUD(); renderHeader(); renderTasks(); renderNotes(); renderDayStats(); renderInventory(); renderArtifacts(); renderQuests(); updateStreak(); }
 
   /* ============ EVENTS ============ */
   $("addBtn").onclick=addTask;
@@ -1170,6 +1335,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("#prioRow .priob"),function(x){x.classList.toggle("active",x===b);}); });
 
   // streak + weekly summary
+  $("toastX").onclick=dismissToast;
   $("streakChip").onclick=openSummary;
   $("summaryBtn").onclick=openSummary;
   $("summaryClose").onclick=function(){ $("summaryOv").classList.remove("show"); };
