@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Focus Quest - il tuo lavoro è un'avventura</title>
+<title>Focus Quest — il tuo lavoro è un'avventura</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNiAxNicgc2hhcGUtcmVuZGVyaW5nPSdjcmlzcEVkZ2VzJz48cmVjdCB3aWR0aD0nMTYnIGhlaWdodD0nMTYnIHJ4PSczJyBmaWxsPScjNUIzRkIwJy8+PHJlY3QgeD0nNycgeT0nMScgd2lkdGg9JzInIGhlaWdodD0nOScgZmlsbD0nI0ZGQzUzRCcvPjxyZWN0IHg9JzcnIHk9JzEnIHdpZHRoPScxJyBoZWlnaHQ9JzknIGZpbGw9JyNGRkUwN0EnLz48cmVjdCB4PSc0JyB5PSc5JyB3aWR0aD0nOCcgaGVpZ2h0PScyJyBmaWxsPScjRkZDNTNEJy8+PHJlY3QgeD0nNycgeT0nMTEnIHdpZHRoPScyJyBoZWlnaHQ9JzMnIGZpbGw9JyM0RTJGOTInLz48cmVjdCB4PSc2JyB5PScxMycgd2lkdGg9JzQnIGhlaWdodD0nMicgZmlsbD0nI0ZGQzUzRCcvPjwvc3ZnPgo=">
 <meta name="theme-color" content="#5B3FB0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -414,6 +414,39 @@
   .glegend #gridMeta{margin-right:auto;color:var(--muted)}
   .glegend #gridMeta b{color:var(--ink)}
 
+  /* ---- dungeon / spedizioni ---- */
+  .dg-intro{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+  .dg-intro b{color:var(--mana)}
+  .dg-card{display:flex;align-items:center;gap:11px;padding:10px;background:var(--slot);border:3px solid var(--edge);margin-bottom:8px}
+  .dg-card.locked{opacity:.55}
+  .dg-ic{width:38px;height:38px;flex:none;display:grid;place-items:center;font-size:22px;background:var(--panel2);border:3px solid var(--edge)}
+  .dg-ic.big{width:46px;height:46px;font-size:26px}
+  .dg-info{flex:1;min-width:0}
+  .dg-name{font-size:15px;font-weight:600;color:var(--ink)}
+  .dg-meta{font-size:12px;color:var(--muted);margin-top:3px}
+  .dg-req{margin-left:auto;font-size:12px;color:var(--faint);white-space:nowrap}
+  .dg-go{flex:none;background:var(--mana);color:#fff;border:3px solid var(--edge2);padding:8px 14px;font-weight:700;box-shadow:2px 2px 0 var(--shadowc)}
+  .dg-go:active{transform:translate(2px,2px);box-shadow:none}
+  .dg-active{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .dg-track{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+  .dg-floor{width:30px;height:30px;flex:none;display:grid;place-items:center;background:var(--slot);border:3px solid var(--edge);
+    font-family:var(--num);font-size:13px;color:var(--faint)}
+  .dg-floor.done{background:var(--mana);border-color:var(--edge2);color:#fff}
+  .dg-floor.next{border-color:var(--gold);color:var(--gold)}
+  .dg-floor.boss{background:var(--panel2);font-size:16px}
+  .dg-floor.boss.done{background:var(--gold);border-color:var(--gold)}
+  .dg-hint{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .dg-abandon{width:100%;background:var(--panel2);color:var(--muted);border:3px solid var(--edge);padding:9px;font-weight:600;box-shadow:2px 2px 0 var(--shadowc)}
+  .dg-abandon:hover{color:var(--hp);border-color:var(--hp)} .dg-abandon:active{transform:translate(2px,2px);box-shadow:none}
+
+  /* ---- support / paypal ---- */
+  .support{text-align:center;margin-top:14px}
+  .coffee{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--body);font-weight:700;font-size:14px;
+    background:#FFC439;color:#173A6A;border:3px solid #E0A800;padding:9px 16px;
+    box-shadow:inset 1px 1px 0 rgba(255,255,255,.5), inset -1px -1px 0 rgba(0,0,0,.15), 3px 3px 0 var(--shadowc)}
+  .coffee:hover{filter:brightness(1.03)}
+  .coffee:active{transform:translate(3px,3px);box-shadow:inset 1px 1px 0 rgba(255,255,255,.5), inset -1px -1px 0 rgba(0,0,0,.15), 0 0 0 var(--shadowc)}
+
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -554,10 +587,13 @@
         </div>
         <div id="tabArt" hidden></div>
       </section>
+
+      <section class="panel pad" id="dungeonPanel" hidden></section>
     </div>
   </div>
 
-  <footer>Focus Quest <b id="verTag">v1.1.0</b> · I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
+  <footer>Focus Quest <b id="verTag">v1.2.0</b> · I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
+  <div class="support"><a class="coffee" href="https://paypal.me/nicoon" target="_blank" rel="noopener">☕ Pagami un caffè</a></div>
 </div>
 
 <!-- toast -->
@@ -642,7 +678,7 @@
 
   /* ============ STORAGE ============ */
   var KEY="focusquest.v1", OLDKEY="focusgiorno.v1";
-  var APP_VERSION="1.1.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
+  var APP_VERSION="1.2.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
   var hasLS=(function(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}})();
   function defaults(){return {characters:{},activeId:null,days:{},bestStreak:0,lastBackup:0,settings:{work:50,brk:5,notify:false,theme:"dark",strict:true,workWeek:false}};}
   function load(){if(!hasLS)return defaults();try{var r=localStorage.getItem(KEY);return r?Object.assign(defaults(),JSON.parse(r)):defaults();}catch(e){return defaults();}}
@@ -747,6 +783,11 @@
   var BASE_XP_MIN=2, TASK_XP=15, BREAK_XP=10, FIRST_FIND=20, BASE_DROP=0.7;
   var QUEST_UNLOCK_LEVEL=3, DUNGEON_UNLOCK_LEVEL=8;
   var QUEST_REWARD={easy:20, med:40, challenge:60}, QUEST_FULLDAY_XP=60;
+  var DUNGEONS=[
+    {key:"cripta", name:"Cripta del Tempo Perduto", icon:"🏰", floors:5, minLevel:8, bossRarity:"epic", xpReward:150},
+    {key:"foresta", name:"Foresta dei Pensieri", icon:"🌲", floors:8, minLevel:11, bossRarity:"epic", xpReward:260},
+    {key:"torre", name:"Torre della Concentrazione", icon:"🗼", floors:12, minLevel:15, bossRarity:"legendary", xpReward:420}
+  ];
   function xpToNext(level){ return 100+(level-1)*60; }
 
   /* ============ CHARACTER LOGIC ============ */
@@ -984,6 +1025,7 @@
       showReward({title:"Sessione completata!",xp:xp,xpNote:cd.focusMult!==1?"con bonus di classe":"focus "+mins+" min",drop:drop,levels:res.levels,unlocked:res.unlocked,mode:"work"});
       renderHUD(); renderInventory(); renderArtifacts(); renderDayStats(); updateStreak();
       announceQuests(checkQuests());
+      announceDungeon(advanceDungeon());
     } else {
       var ch2=activeChar(); var r2={levels:[],unlocked:[]};
       if(ch2){ r2=addXP(ch2,BREAK_XP); }
@@ -1275,8 +1317,65 @@
     var meta=$("gridMeta"); if(meta) meta.innerHTML="Totale: <b>"+total+" min</b> · Giorni attivi: <b>"+active+"</b>";
   }
 
+  /* ============ DUNGEONS (spedizioni) ============ */
+  function dungeonDef(key){ return DUNGEONS.find(function(d){return d.key===key;}); }
+  function startDungeon(key){ var ch=activeChar(); if(!ch)return; var def=dungeonDef(key); if(!def||ch.level<def.minLevel)return;
+    ch.dungeon={key:key,floor:0,startedAt:Date.now()}; save(); renderDungeon();
+    showToast("Spedizione iniziata!", def.name+" — "+def.floors+" piani. Completa una sessione di focus per scendere.", def.icon); }
+  function abandonDungeon(){ var ch=activeChar(); if(!ch||!ch.dungeon)return;
+    if(confirm("Abbandonare la spedizione? I piani già superati andranno persi.")){ ch.dungeon=null; save(); renderDungeon();
+      showToast("Spedizione abbandonata","Nessuna penalità: puoi ripartire quando vuoi.","🚪"); } }
+  function advanceDungeon(){
+    var ch=activeChar(); if(!ch||!ch.dungeon)return null; var def=dungeonDef(ch.dungeon.key); if(!def){ch.dungeon=null;return null;}
+    ch.dungeon.floor=(ch.dungeon.floor||0)+1; var f=ch.dungeon.floor;
+    var res={def:def,floor:f,loot:null,boss:false,xp:0,levels:[],unlocked:[]};
+    if(f>=def.floors){ var bl=grantLoot(ch,def.bossRarity), r=addXP(ch,def.xpReward);
+      res.boss=true; res.loot=bl; res.xp=def.xpReward; res.levels=r.levels; res.unlocked=r.unlocked;
+      ch.stats.dungeons=(ch.stats.dungeons||0)+1; ch.dungeon=null;
+    } else if(Math.random()<0.5){ res.loot=grantLoot(ch,null); }
+    save(); return res;
+  }
+  function announceDungeon(res){
+    if(!res)return;
+    if(res.boss){ showToast("🏆 "+res.def.name+" completata!", "Boss sconfitto: +"+res.xp+" XP e bottino "+RAR_IT[res.loot.rarity]+" ("+res.loot.item.name+")!", res.def.icon);
+      if(res.levels.length){ jingle("level"); showToast("★ LEVEL UP ★","Sei salito al livello "+res.levels[res.levels.length-1]+"!","⬆️"); }
+      res.unlocked.forEach(function(a){ showToast("Nuovo artefatto!",a.name+" — "+a.blurb,a.icon); });
+    } else { showToast(res.def.icon+" "+res.def.name, "Piano "+res.floor+"/"+res.def.floors+" superato"+(res.loot?" — bottino: "+res.loot.item.name:"")+".", "🗺️"); }
+    renderHUD(); renderInventory(); renderArtifacts(); renderDungeon();
+  }
+  function renderDungeon(){
+    var panel=$("dungeonPanel"), ch=activeChar(); if(!ch){panel.hidden=true;return;}
+    panel.hidden=false;
+    var header='<div class="head"><div><div class="eyebrow">SPEDIZIONE</div><h2>Dungeon</h2></div>'+(ch.stats.dungeons?'<span class="qfull">🏆 '+ch.stats.dungeons+'</span>':'')+'</div>';
+    if(ch.level<DUNGEON_UNLOCK_LEVEL){
+      panel.innerHTML=header+'<div class="qlock">🔒 Le spedizioni si sbloccano al <b>livello '+DUNGEON_UNLOCK_LEVEL+'</b>.<br><span>Continua a salire: presto potrai esplorare i dungeon.</span></div>';
+      return;
+    }
+    if(!db.dungeonsAnnounced){ db.dungeonsAnnounced=true; save(); showToast("⚔️ Spedizioni sbloccate!","Sei al livello "+DUNGEON_UNLOCK_LEVEL+": puoi partire per i dungeon. Ogni sessione di focus ti fa scendere di un piano.","⚔️"); }
+    if(!ch.dungeon){
+      var html=header+'<div class="dg-intro">Avanzi di un piano per ogni <b>sessione di focus</b> completata. In fondo un boss custodisce un bottino prezioso.</div>';
+      DUNGEONS.forEach(function(def){ var locked=ch.level<def.minLevel;
+        html+='<div class="dg-card'+(locked?" locked":"")+'"><div class="dg-ic">'+def.icon+'</div>'+
+          '<div class="dg-info"><div class="dg-name">'+def.name+'</div><div class="dg-meta">'+def.floors+' piani · '+def.floors+' sessioni · boss '+RAR_IT[def.bossRarity]+'</div></div>'+
+          (locked?'<div class="dg-req">Lv '+def.minLevel+'</div>':'<button class="dg-go" data-k="'+def.key+'">Parti</button>')+'</div>';
+      });
+      panel.innerHTML=html;
+      Array.prototype.forEach.call(panel.querySelectorAll(".dg-go"),function(b){ b.onclick=function(){ startDungeon(b.dataset.k); }; });
+    } else {
+      var def=dungeonDef(ch.dungeon.key), f=ch.dungeon.floor||0, track="";
+      for(var i=1;i<=def.floors;i++){ var isBoss=i===def.floors, cls=i<=f?"done":(i===f+1?"next":"");
+        track+='<div class="dg-floor '+cls+(isBoss?" boss":"")+'">'+(isBoss?"💀":i)+'</div>'; }
+      panel.innerHTML=header+
+        '<div class="dg-active"><div class="dg-ic big">'+def.icon+'</div><div><div class="dg-name">'+def.name+'</div><div class="dg-meta">Piano '+Math.min(f,def.floors)+' / '+def.floors+'</div></div></div>'+
+        '<div class="dg-track">'+track+'</div>'+
+        '<div class="dg-hint">Completa una sessione di focus per scendere di un piano.</div>'+
+        '<button class="dg-abandon" id="dgAbandon">Abbandona spedizione</button>';
+      $("dgAbandon").onclick=abandonDungeon;
+    }
+  }
+
   /* ============ RENDER ALL ============ */
-  function renderAll(){ renderHUD(); renderHeader(); renderTasks(); renderNotes(); renderDayStats(); renderInventory(); renderArtifacts(); renderQuests(); updateStreak(); }
+  function renderAll(){ renderHUD(); renderHeader(); renderTasks(); renderNotes(); renderDayStats(); renderInventory(); renderArtifacts(); renderQuests(); renderDungeon(); updateStreak(); }
 
   /* ============ EVENTS ============ */
   $("addBtn").onclick=addTask;
