@@ -678,7 +678,7 @@
 
   /* ============ STORAGE ============ */
   var KEY="focusquest.v1", OLDKEY="focusgiorno.v1";
-  var APP_VERSION="1.2.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
+  var APP_VERSION="1.2.1"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
   var hasLS=(function(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}})();
   function defaults(){return {characters:{},activeId:null,days:{},bestStreak:0,lastBackup:0,settings:{work:50,brk:5,notify:false,theme:"dark",strict:true,workWeek:false}};}
   function load(){if(!hasLS)return defaults();try{var r=localStorage.getItem(KEY);return r?Object.assign(defaults(),JSON.parse(r)):defaults();}catch(e){return defaults();}}
