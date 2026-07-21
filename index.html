@@ -466,6 +466,7 @@
       <button class="ubtn" id="summaryBtn" title="Statistiche e storico">📊 <span>Statistiche</span></button>
       <button class="ubtn" id="themeBtn" title="Cambia tema">🌙 <span id="themeLabel">Notte</span></button>
       <button class="ubtn off" id="notifBtn" title="Attiva le notifiche"><span class="dot"></span><span id="notifLabel">Notifiche</span></button>
+      <button class="ubtn off" id="cloudBtn" title="Accedi per sincronizzare i progressi tra dispositivi"><span class="dot"></span><span id="cloudLabel">Accedi</span></button>
     </div>
   </div>
 
@@ -592,7 +593,7 @@
     </div>
   </div>
 
-  <footer>Focus Quest <b id="verTag">v1.2.0</b> · I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
+  <footer>Focus Quest <b id="verTag">v1.3.0</b> · I dati restano solo su questo computer. Esporta un salvataggio ogni tanto: è la tua pergamena di backup.</footer>
   <div class="support"><a class="coffee" href="https://paypal.me/nicoon" target="_blank" rel="noopener">☕ Pagami un caffè</a></div>
 </div>
 
@@ -678,7 +679,7 @@
 
   /* ============ STORAGE ============ */
   var KEY="focusquest.v1", OLDKEY="focusgiorno.v1";
-  var APP_VERSION="1.2.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
+  var APP_VERSION="1.3.0"; // <-- AUMENTA QUESTO NUMERO A OGNI PATCH (es. 1.0.1, 1.1.0)
   var hasLS=(function(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}})();
   function defaults(){return {characters:{},activeId:null,days:{},bestStreak:0,lastBackup:0,settings:{work:50,brk:5,notify:false,theme:"dark",strict:true,workWeek:false}};}
   function load(){if(!hasLS)return defaults();try{var r=localStorage.getItem(KEY);return r?Object.assign(defaults(),JSON.parse(r)):defaults();}catch(e){return defaults();}}
@@ -890,6 +891,7 @@
     }
     save(); renderTasks(); renderDayStats(); updateStreak();
     announceQuests(checkQuests());
+    if(window.FQpush) window.FQpush();
   }
 
   /* ============ CARRY-OVER ============ */
@@ -1026,12 +1028,14 @@
       renderHUD(); renderInventory(); renderArtifacts(); renderDayStats(); updateStreak();
       announceQuests(checkQuests());
       announceDungeon(advanceDungeon());
+      if(window.FQpush) window.FQpush();
     } else {
       var ch2=activeChar(); var r2={levels:[],unlocked:[]};
       if(ch2){ r2=addXP(ch2,BREAK_XP); }
       jingle("ding"); notify("Pausa finita ☕","Torna in missione quando sei pronto. +"+BREAK_XP+" XP.");
       showReward({title:"Pausa finita",xp:BREAK_XP,xpNote:"recupero",drop:null,levels:r2.levels,unlocked:r2.unlocked,mode:"break"});
       renderHUD();
+      if(window.FQpush) window.FQpush();
     }
   }
 
@@ -1460,6 +1464,55 @@
 
   window.addEventListener("beforeunload",function(e){ if(running){ e.preventDefault(); e.returnValue=""; } });
 
+  /* ============ CLOUD MERGE BRIDGE ============ */
+  function totalProg(c){ return (c.level||1)*1000000 + (c.xp||0); }
+  function mergeChar(a,b){
+    var base=totalProg(a)>=totalProg(b)?a:b, other=base===a?b:a;
+    var out=JSON.parse(JSON.stringify(base));
+    out.inventory=out.inventory||{}; var oi=other.inventory||{};
+    Object.keys(oi).forEach(function(k){ out.inventory[k]=Math.max(out.inventory[k]||0, oi[k]||0); });
+    var arts={}; (out.artifacts||[]).concat(other.artifacts||[]).forEach(function(x){arts[x]=1;}); out.artifacts=Object.keys(arts);
+    out.stats=out.stats||{}; var os=other.stats||{};
+    ["sessions","focusMin","tasksDone","drops","dungeons"].forEach(function(s){ out.stats[s]=Math.max(out.stats[s]||0, os[s]||0); });
+    return out;
+  }
+  function mergeDay(a,b){
+    var out={ sessions:Math.max(a.sessions||0,b.sessions||0), focusMin:Math.max(a.focusMin||0,b.focusMin||0),
+      notes:((a.notes||"").length>=(b.notes||"").length?a.notes:b.notes)||"" };
+    var byId={}; (a.tasks||[]).forEach(function(t){byId[t.id]=t;});
+    (b.tasks||[]).forEach(function(t){ if(!byId[t.id]) byId[t.id]=t; else if(t.done && !byId[t.id].done) byId[t.id]=t; });
+    out.tasks=Object.keys(byId).map(function(k){return byId[k];});
+    out.quests=a.quests||b.quests; out.questBonus=a.questBonus||b.questBonus;
+    return out;
+  }
+  function mergeDB(a,b){
+    if(!b) return a; if(!a) return b;
+    var out=defaults();
+    out.settings=Object.assign({}, b.settings||{}, a.settings||{});
+    out.bestStreak=Math.max(a.bestStreak||0, b.bestStreak||0);
+    out.lastBackup=Math.max(a.lastBackup||0, b.lastBackup||0);
+    out.lastVersion=a.lastVersion||b.lastVersion;
+    out.questsAnnounced=a.questsAnnounced||b.questsAnnounced;
+    out.dungeonsAnnounced=a.dungeonsAnnounced||b.dungeonsAnnounced;
+    out.characters={}; var ids={}; Object.keys(a.characters||{}).forEach(function(k){ids[k]=1;}); Object.keys(b.characters||{}).forEach(function(k){ids[k]=1;});
+    Object.keys(ids).forEach(function(id){ var ca=a.characters&&a.characters[id], cb=b.characters&&b.characters[id];
+      out.characters[id]=(ca&&cb)?mergeChar(ca,cb):(ca||cb); });
+    out.days={}; var dk={}; Object.keys(a.days||{}).forEach(function(k){dk[k]=1;}); Object.keys(b.days||{}).forEach(function(k){dk[k]=1;});
+    Object.keys(dk).forEach(function(k){ var da=a.days&&a.days[k], dbb=b.days&&b.days[k];
+      out.days[k]=(da&&dbb)?mergeDay(da,dbb):(da||dbb); });
+    out.activeId=(a.activeId&&out.characters[a.activeId])?a.activeId:((b.activeId&&out.characters[b.activeId])?b.activeId:(Object.keys(out.characters)[0]||null));
+    return out;
+  }
+  function applyRemote(remote){
+    try{ db=mergeDB(db, remote); save();
+      durations.work=(db.settings.work||50)*60; durations.brk=(db.settings.brk||5)*60;
+      $("cw").value=db.settings.work||50; $("cb").value=db.settings.brk||5;
+      applyTheme(); applyStrict();
+      if(activeChar()){ $("createOv").classList.remove("show"); renderAll(); setMode(mode,true); }
+    }catch(e){}
+  }
+  window.FQ={ snapshot:function(){ return JSON.parse(JSON.stringify(db)); }, applyRemote:applyRemote, toast:function(t,m,ic){ showToast(t,m,ic); }, version:APP_VERSION };
+
   /* ============ INIT ============ */
   var verEl=$("verTag"); if(verEl) verEl.textContent="v"+APP_VERSION;
   (function(){ var prev=db.lastVersion;
@@ -1469,6 +1522,113 @@
   applyTheme(); refreshNotif(); applyStrict(); setMode("work",true); updateStreak(); checkBackupReminder();
   if(!activeChar()){ openCreate(false); } else { renderAll(); }
 })();
+</script>
+
+<!-- ============================================================
+     SINCRONIZZAZIONE CLOUD (Firebase) — OPZIONALE
+     Se non configuri Firebase, questo blocco resta inattivo e
+     l'app funziona esattamente come prima (solo salvataggio locale).
+
+     PER ATTIVARLA:
+     1) Crea un progetto su https://console.firebase.google.com
+     2) Build > Authentication > inizia > abilita il provider "Google"
+     3) Build > Firestore Database > crea database, e incolla queste regole
+        (Rules), che proteggono i dati di ogni utente:
+
+          rules_version = '2';
+          service cloud.firestore {
+            match /databases/{database}/documents {
+              match /users/{uid} {
+                allow read, write: if request.auth != null && request.auth.uid == uid;
+              }
+            }
+          }
+
+     4) Impostazioni progetto (⚙) > Le tue app > Web (</>) > registra l'app
+        e copia i valori del firebaseConfig QUI SOTTO al posto di "INCOLLA_QUI".
+     5) In Authentication > Settings > Authorized domains, aggiungi il tuo
+        dominio (es. tuonome.github.io) e localhost.
+     ============================================================ -->
+<script type="module">
+  const firebaseConfig = {
+    apiKey: "AIzaSyBnCZ_IvzcbDdPNQfw0zRV2SWy5iIZG4LY",
+    authDomain: "focus-quest-5489d.firebaseapp.com",
+    projectId: "focus-quest-5489d",
+    storageBucket: "focus-quest-5489d.firebasestorage.app",
+    messagingSenderId: "551461121184",
+    appId: "1:551461121184:web:81c9734a0d15b4f364adc5"
+  };
+
+  const btn = document.getElementById("cloudBtn");
+  const lbl = document.getElementById("cloudLabel");
+  const configured = !Object.values(firebaseConfig).some(function(v){ return !v || v === "INCOLLA_QUI"; });
+
+  if(!configured){
+    if(btn){ btn.title = "Sync spenta: configura Firebase nel file per attivarla"; if(lbl) lbl.textContent = "Sync off"; }
+  } else {
+    const V = "12.16.0";
+    const base = "https://www.gstatic.com/firebasejs/" + V + "/";
+    const { initializeApp } = await import(base + "firebase-app.js");
+    const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = await import(base + "firebase-auth.js");
+    const { getFirestore, doc, getDoc, setDoc, onSnapshot } = await import(base + "firebase-firestore.js");
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const fs = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let deviceId = localStorage.getItem("fq_device");
+    if(!deviceId){ deviceId = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("fq_device", deviceId); }
+
+    let uid = null, ref = null, unsub = null, pushT = null;
+
+    async function pull(){
+      try{ const snap = await getDoc(ref);
+        if(snap.exists()){ const data = snap.data(); if(data && data.db) window.FQ.applyRemote(data.db); }
+      }catch(e){ console.warn("FQ pull:", e); }
+    }
+    async function pushNow(){
+      if(!uid || !ref) return;
+      try{ await setDoc(ref, { db: window.FQ.snapshot(), deviceId: deviceId, updatedAt: Date.now() }); }
+      catch(e){ console.warn("FQ push:", e); }
+    }
+    // esposto all'app: chiamato a fine missione/quest/spedizione/sessione (con debounce)
+    window.FQpush = function(){ if(!uid) return; if(pushT) clearTimeout(pushT); pushT = setTimeout(pushNow, 1500); };
+
+    function listen(){
+      if(unsub) unsub();
+      unsub = onSnapshot(ref, function(snap){
+        if(!snap.exists() || snap.metadata.hasPendingWrites) return; // ignora le nostre scritture non confermate
+        const data = snap.data(); if(!data || !data.db || data.deviceId === deviceId) return; // ignora l'eco di questo dispositivo
+        window.FQ.applyRemote(data.db);
+        window.FQ.toast("☁️ Sincronizzato", "Progressi aggiornati da un altro dispositivo.", "☁️");
+      });
+    }
+
+    onAuthStateChanged(auth, async function(user){
+      if(user){
+        uid = user.uid; ref = doc(fs, "users", uid);
+        if(lbl) lbl.textContent = user.displayName ? user.displayName.split(" ")[0] : "Account";
+        if(btn){ btn.classList.add("on"); btn.classList.remove("off"); }
+        await pull();      // scarica dal cloud e fondi col locale (nessun progresso perso)
+        await pushNow();   // risalva il risultato fuso
+        listen();          // ascolta gli altri dispositivi
+        window.FQ.toast("☁️ Accesso eseguito", "Progressi locali e cloud uniti. Sincronizzazione attiva.", "☁️");
+      } else {
+        uid = null; ref = null; if(unsub){ unsub(); unsub = null; }
+        if(lbl) lbl.textContent = "Accedi";
+        if(btn){ btn.classList.remove("on"); btn.classList.add("off"); }
+      }
+    });
+
+    if(btn) btn.onclick = async function(){
+      if(uid){ if(confirm("Disconnettere l'account? I progressi restano su questo dispositivo.")) signOut(auth); }
+      else { try{ await signInWithPopup(auth, provider); }catch(e){ window.FQ.toast("Accesso annullato", "Login non completato.", "⚠️"); } }
+    };
+
+    // rete di sicurezza: salva alla chiusura
+    window.addEventListener("beforeunload", function(){ if(uid && ref){ try{ setDoc(ref, { db: window.FQ.snapshot(), deviceId: deviceId, updatedAt: Date.now() }); }catch(e){} } });
+  }
 </script>
 </body>
 </html>
